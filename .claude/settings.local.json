@@ -4,7 +4,8 @@
       "Bash(npm create vite@latest . -- --template react-ts)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(npm run dev)"
     ],
     "deny": [],
     "ask": []
