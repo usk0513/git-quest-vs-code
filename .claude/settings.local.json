@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm create vite@latest . -- --template react-ts)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []
