@@ -1,0 +1,60 @@
+import React from 'react';
+import { StepConfig } from '@/types';
+import { Button } from '../Common/Button';
+
+interface InstructionPaneProps {
+  step: StepConfig;
+  onNext?: () => void;
+}
+
+export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext }) => {
+  return (
+    <div className="h-full bg-vscode-bg border-l border-vscode-border overflow-y-auto">
+      <div className="p-4">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-vscode-text mb-2">
+            {step.title}
+          </h2>
+          <p className="text-sm text-vscode-text-secondary">{step.description}</p>
+        </div>
+
+        <div className="mb-6 p-4 bg-vscode-sidebar rounded border border-vscode-border">
+          <h3 className="text-sm font-medium text-vscode-text mb-2">📘 説明</h3>
+          <div className="text-sm text-vscode-text whitespace-pre-wrap">
+            {step.detailedInstructions}
+          </div>
+        </div>
+
+        {step.hints.length > 0 && (
+          <div className="mb-6 p-4 bg-vscode-hint-bg rounded border border-vscode-warning">
+            <h3 className="text-sm font-medium text-vscode-text mb-2">💡 ヒント</h3>
+            <ul className="text-sm text-vscode-text space-y-1">
+              {step.hints.map((hint, index) => (
+                <li key={index}>• {hint}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {step.id === 0 && onNext && (
+          <div className="mt-4">
+            <Button onClick={onNext} className="w-full">
+              次へ →
+            </Button>
+          </div>
+        )}
+
+        {step.stage === 'terminal' && (
+          <div className="p-4 bg-vscode-sidebar rounded border border-vscode-border">
+            <h3 className="text-sm font-medium text-vscode-text mb-2">
+              ✅ 成功条件
+            </h3>
+            <div className="text-sm text-vscode-text-secondary">
+              {step.successMessage}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
