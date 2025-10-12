@@ -2,6 +2,8 @@ import React from 'react';
 import { SourceControlView } from '../SourceControl/SourceControlView';
 import { ExplorerView } from '../Explorer/ExplorerView';
 import { GitState } from '@/types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFolder, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
   view: 'source-control' | 'explorer';
@@ -37,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`}
           title="エクスプローラー"
         >
-          📁
+          <FontAwesomeIcon icon={faFolder} size="lg" />
         </button>
         <button
           onClick={() => onViewChange('source-control')}
@@ -46,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`}
           title="ソース管理"
         >
-          ☰
+          <FontAwesomeIcon icon={faCodeBranch} size="lg" />
         </button>
       </div>
 
