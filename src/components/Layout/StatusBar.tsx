@@ -22,9 +22,14 @@ const BranchMenu: React.FC<{
   }, [branches]);
 
   return createPortal(
-    <div className="fixed inset-0 z-30 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden">
+    <div
+      className="fixed inset-0 z-30 flex items-start justify-center"
+      onClick={onClose}
+    >
+      <div
+        className="mt-14 bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="p-3 border-b border-vscode-border text-sm font-semibold text-vscode-text">
           ブランチの切り替え
         </div>
