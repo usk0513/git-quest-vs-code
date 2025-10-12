@@ -7,6 +7,7 @@ interface SourceControlViewProps {
   onStageFile: (filepath: string) => void;
   onCommit: (message: string) => void;
   onPush: () => void;
+  readOnly?: boolean;
 }
 
 export const SourceControlView: React.FC<SourceControlViewProps> = ({
@@ -14,10 +15,12 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
   onStageFile,
   onCommit,
   onPush,
+  readOnly = false,
 }) => {
   const [commitMessage, setCommitMessage] = useState('');
 
   const handleCommit = () => {
+    if (readOnly) return;
     if (commitMessage.trim()) {
       onCommit(commitMessage);
       setCommitMessage('');
@@ -42,14 +45,17 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
             <textarea
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
-              placeholder="コミットメッセージ"
+              placeholder={readOnly ? 'GUIステージでコミットできます' : 'コミットメッセージ'}
               className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded focus:border-vscode-input-focus outline-none resize-none"
+              disabled={readOnly}
               rows={3}
             />
             <div className="mt-2 flex gap-2">
               <Button
                 onClick={handleCommit}
-                disabled={!commitMessage.trim() || gitState.stagedFiles.length === 0}
+                disabled={
+                  readOnly || !commitMessage.trim() || gitState.stagedFiles.length === 0
+                }
                 className="flex-1 text-sm"
               >
                 ✓ コミット
@@ -59,6 +65,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                   onClick={onPush}
                   variant="secondary"
                   className="flex-1 text-sm"
+                  disabled={readOnly}
                 >
                   ↑ プッシュ
                 </Button>
@@ -98,8 +105,11 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                     <span className="text-vscode-text">{file.path}</span>
                   </div>
                   <button
-                    onClick={() => onStageFile(file.path)}
-                    className="opacity-0 group-hover:opacity-100 text-vscode-accent hover:bg-vscode-active px-2 py-1 rounded"
+                    onClick={readOnly ? undefined : () => onStageFile(file.path)}
+                    className={`${
+                      readOnly ? 'opacity-40 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:bg-vscode-active'
+                    } text-vscode-accent px-2 py-1 rounded`}
+                    disabled={readOnly}
                   >
                     +
                   </button>
@@ -168,6 +178,12 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
         {!gitState.isRepository && (
           <div className="p-4 text-center text-sm text-vscode-text-muted">
             リポジトリがまだクローンされていません
+          </div>
+        )}
+
+        {readOnly && gitState.isRepository && (
+          <div className="p-3 text-xs text-vscode-text-muted border-t border-vscode-border">
+            ※ このソース管理ビューはコマンドステージでは閲覧のみ可能です。
           </div>
         )}
       </div>

@@ -15,6 +15,7 @@ interface SidebarProps {
   onStageFile: (filepath: string) => void;
   onCommit: (message: string) => void;
   onPush: () => void;
+  sourceControlReadOnly?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -27,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onStageFile,
   onCommit,
   onPush,
+  sourceControlReadOnly = false,
 }) => {
   return (
     <div className="h-full flex">
@@ -60,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onStageFile={onStageFile}
             onCommit={onCommit}
             onPush={onPush}
+            readOnly={sourceControlReadOnly}
           />
         ) : (
           <ExplorerView

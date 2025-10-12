@@ -82,6 +82,7 @@ function App() {
             onStageFile={stageFile}
             onCommit={commit}
             onPush={push}
+            sourceControlReadOnly={currentStep.stage === 'terminal'}
           />
         </div>
 
