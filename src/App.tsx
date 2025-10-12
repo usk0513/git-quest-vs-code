@@ -51,10 +51,15 @@ function App() {
     );
   }
 
+  const modeLabel =
+    currentStep.stage === 'terminal'
+      ? 'コマンドステージ（Gitコマンド操作を学習中）'
+      : 'GUIステージ（VS Code操作を学習中）';
+
   return (
     <div className="w-screen h-screen bg-vscode-bg flex flex-col overflow-hidden">
       {/* Header */}
-      <Header onReset={reset} />
+      <Header onReset={reset} modeLabel={modeLabel} />
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">

@@ -76,6 +76,7 @@ export class TutorialService {
         this.currentStepConfig.allowedCommands,
         {
           allowBranchCreation: this.currentStepConfig.allowBranchCreation,
+          allowMutatingCommands: this.currentStep.stage === 'terminal',
         }
       );
 

@@ -386,7 +386,8 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 
 VS Codeと同じ操作でブランチを作成できます！
     `,
-    allowedCommands: [],
+    allowedCommands: ['status', 'log', 'branch'],
+    allowBranchCreation: false,
     allowedGuiActions: ['create-branch', 'switch-branch'],
     hints: [
       'ステータスバーのブランチ名をクリックしてください',
@@ -415,7 +416,8 @@ VS Codeと同じ操作でブランチを作成できます！
 
 編集すると、左側のソース管理に変更が表示されます。
     `,
-    allowedCommands: [],
+    allowedCommands: ['status', 'log', 'branch'],
+    allowBranchCreation: false,
     allowedGuiActions: ['edit-file'],
     hints: [
       'エクスプローラーから greeting.txt を開いてください',
@@ -442,7 +444,8 @@ VS Codeと同じ操作でブランチを作成できます！
 
 ファイルが「ステージ済み」セクションに移動します。
     `,
-    allowedCommands: [],
+    allowedCommands: ['status', 'log', 'branch'],
+    allowBranchCreation: false,
     allowedGuiActions: ['stage-file'],
     hints: [
       'ソース管理ビューを開いてください',
@@ -469,7 +472,8 @@ VS Codeと同じ操作でブランチを作成できます！
 
 コミットが完了すると、コミット履歴に表示されます。
     `,
-    allowedCommands: [],
+    allowedCommands: ['status', 'log', 'branch'],
+    allowBranchCreation: false,
     allowedGuiActions: ['commit'],
     hints: [
       'コミットメッセージを入力してください',
@@ -496,7 +500,8 @@ VS Codeと同じ操作でブランチを作成できます！
 
 おめでとうございます！すべてのチュートリアルを完了しました！
     `,
-    allowedCommands: [],
+    allowedCommands: ['status', 'log', 'branch'],
+    allowBranchCreation: false,
     allowedGuiActions: ['push'],
     hints: [
       'プッシュボタンをクリックしてください',

@@ -3,6 +3,7 @@ import { CommandParser } from '../terminal/CommandParser';
 
 interface CommandValidationOptions {
   allowBranchCreation?: boolean;
+  allowMutatingCommands?: boolean;
 }
 
 export class GitValidator {
@@ -39,6 +40,14 @@ export class GitValidator {
         };
       }
 
+      if (options.allowMutatingCommands === false && this.isMutatingCommand(parsed.command)) {
+        return {
+          passed: false,
+          message: `The command "git ${parsed.command}" is disabled in GUI stage`,
+          hint: 'Use the on-screen controls to perform this action',
+        };
+      }
+
       // Command-specific validation
       const validation = this.validateSpecificCommand(parsed, options);
       if (!validation.passed) {
@@ -63,7 +72,7 @@ export class GitValidator {
     options: CommandValidationOptions
   ): ValidationResult {
     const allowedBranchNames = ['feature/add-greeting'];
-    const allowBranchCreation = options.allowBranchCreation !== false;
+    const allowBranchCreation = options.allowMutatingCommands !== false && options.allowBranchCreation !== false;
 
     switch (parsed.command) {
       case 'clone':
@@ -84,6 +93,13 @@ export class GitValidator {
         break;
 
       case 'commit':
+        if (options.allowMutatingCommands === false) {
+          return {
+            passed: false,
+            message: 'git commit is disabled in GUI stage',
+            hint: 'Use the GUI to commit changes instead',
+          };
+        }
         if (!parsed.flags.includes('-m')) {
           return {
             passed: false,
@@ -101,6 +117,13 @@ export class GitValidator {
         break;
 
       case 'add':
+        if (options.allowMutatingCommands === false) {
+          return {
+            passed: false,
+            message: 'git add is disabled in GUI stage',
+            hint: 'Use the GUI to stage files instead',
+          };
+        }
         if (parsed.args.length === 0) {
           return {
             passed: false,
@@ -173,6 +196,13 @@ export class GitValidator {
         break;
 
       case 'push':
+        if (options.allowMutatingCommands === false) {
+          return {
+            passed: false,
+            message: 'git push is disabled in GUI stage',
+            hint: 'Use the GUI to push changes instead',
+          };
+        }
         if (parsed.args.length < 2) {
           return {
             passed: false,
@@ -184,5 +214,19 @@ export class GitValidator {
     }
 
     return { passed: true, message: 'Valid command' };
+  }
+
+  private isMutatingCommand(command: GitCommand): boolean {
+    switch (command) {
+      case 'add':
+      case 'commit':
+      case 'push':
+      case 'clone':
+      case 'checkout':
+      case 'branch':
+        return true;
+      default:
+        return false;
+    }
   }
 }
