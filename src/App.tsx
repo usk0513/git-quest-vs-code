@@ -93,7 +93,7 @@ function App() {
         <div className="w-96">
           <InstructionPane
             step={currentStep}
-            onNext={currentStep.id === 0 ? nextStep : undefined}
+            onNext={currentStep.autoAdvance === false ? nextStep : undefined}
           />
         </div>
       </div>

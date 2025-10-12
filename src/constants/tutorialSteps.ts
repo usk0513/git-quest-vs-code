@@ -21,6 +21,7 @@ Git Questへようこそ！
     hints: [],
     successMessage: '準備完了です！次のステップに進みましょう。',
     validationRules: [],
+    autoAdvance: false,
   },
   // Step 1: git clone
   {
@@ -58,9 +59,35 @@ git clone /remote-repo
       { type: 'file-exists', target: 'greeting.txt' },
     ],
   },
-  // Step 2: Create branch
+  // Step 1 confirm
   {
     id: 2,
+    stage: 'terminal',
+    title: 'Step 1: クローン結果を確認',
+    description: 'クローンしたファイルをUIで確認します',
+    detailedInstructions: `
+## クローン結果を確認
+
+左側のエクスプローラービューを開き、\`README.md\` や \`greeting.txt\` が表示されているか確認しましょう。
+リモートから取得したファイルがローカルに展開されていることがわかります。
+
+必要に応じて \`git status\` や \`git branch\` を実行して、ワークスペースの状態を確認しても構いません。
+
+確認が終わったら、右上の「次へ」ボタンを押して次のステップへ進んでください。
+    `,
+    allowedCommands: ['status', 'branch', 'log'],
+    hints: [
+      'エクスプローラーに README.md や greeting.txt が表示されているか確認しましょう',
+      'git status で作業ツリーがクリーンなことを確認できます',
+      '確認できたら「次へ」を押して先に進みます',
+    ],
+    successMessage: 'エクスプローラーでファイルを確認したら「次へ」を押しましょう。',
+    validationRules: [],
+    autoAdvance: false,
+  },
+  // Step 2: Create branch
+  {
+    id: 3,
     stage: 'terminal',
     title: 'Step 2: 新しいブランチを作成',
     description: '作業用のブランチを作成して切り替えます',
@@ -93,9 +120,33 @@ git checkout feature/add-greeting
       { type: 'branch-switched', target: 'feature/add-greeting' },
     ],
   },
+  // Step 2 confirm
+  {
+    id: 4,
+    stage: 'terminal',
+    title: 'Step 2: ブランチの状態を確認',
+    description: 'ブランチが切り替わったことを確認します',
+    detailedInstructions: `
+## ブランチの状態を確認
+
+ターミナルで \`git branch\` を実行するか、ステータスバーを見て現在のブランチが \`feature/add-greeting\` になっていることを確認しましょう。
+エクスプローラーのファイルはまだ変更されていません。
+
+確認できたら「次へ」を押して次に進みます。
+    `,
+    allowedCommands: ['branch', 'status', 'log'],
+    hints: [
+      'git branch で現在のブランチを確認できます',
+      'ステータスバーに表示されるブランチ名も確認してみましょう',
+      '確認できたら「次へ」を押して先に進みます',
+    ],
+    successMessage: 'feature/add-greeting ブランチに切り替わっていることを確認できたら「次へ」を押してください。',
+    validationRules: [],
+    autoAdvance: false,
+  },
   // Step 3: Edit file
   {
-    id: 3,
+    id: 5,
     stage: 'terminal',
     title: 'Step 3: ファイルを編集',
     description: 'greeting.txt に内容を追加します',
@@ -121,9 +172,33 @@ Hello, Git!
       { type: 'file-content', target: 'greeting.txt', expectedValue: 'Hello, Git!' },
     ],
   },
+  // Step 3 confirm
+  {
+    id: 6,
+    stage: 'terminal',
+    title: 'Step 3: 変更内容を確認',
+    description: 'ソース管理に編集内容が反映されたかを確認します',
+    detailedInstructions: `
+## 変更内容を確認
+
+ソース管理ビューで \`greeting.txt\` が変更として表示されているか確認しましょう。
+必要に応じて \`git diff\` で差分を確認しても構いません。
+
+確認できたら「次へ」を押して次のステップに進みましょう。
+    `,
+    allowedCommands: ['status', 'diff'],
+    hints: [
+      'ソース管理ビューに greeting.txt が表示されているか確認してください',
+      'git diff で変更内容の差分を確認できます',
+      '確認できたら「次へ」を押して先に進みます',
+    ],
+    successMessage: '変更内容を確認できたら「次へ」を押して先に進みましょう。',
+    validationRules: [],
+    autoAdvance: false,
+  },
   // Step 4: git add
   {
-    id: 4,
+    id: 7,
     stage: 'terminal',
     title: 'Step 4: 変更をステージング',
     description: '変更したファイルをステージングエリアに追加します',
@@ -154,9 +229,33 @@ git add .
       { type: 'file-staged', target: 'greeting.txt' },
     ],
   },
+  // Step 4 confirm
+  {
+    id: 8,
+    stage: 'terminal',
+    title: 'Step 4: ステージ状態を確認',
+    description: 'ステージングされたファイルを確認します',
+    detailedInstructions: `
+## ステージ状態を確認
+
+ソース管理ビューの「ステージ済みの変更」に \`greeting.txt\` が移動していることを確認します。
+\`git status\` でもステージ済みのファイルを確認できます。
+
+確認が終わったら「次へ」を押してください。
+    `,
+    allowedCommands: ['status'],
+    hints: [
+      'ステージ済みの変更に greeting.txt が表示されていることを確認してください',
+      'git status でステージングされたファイルを再確認できます',
+      '確認できたら「次へ」を押して先に進みます',
+    ],
+    successMessage: 'ステージ状態を確認できたら「次へ」を押して進みましょう。',
+    validationRules: [],
+    autoAdvance: false,
+  },
   // Step 5: git commit
   {
-    id: 5,
+    id: 9,
     stage: 'terminal',
     title: 'Step 5: 変更をコミット',
     description: 'ステージングした変更をコミットします',
@@ -183,9 +282,33 @@ git commit -m "Add greeting message"
       { type: 'commit-made' },
     ],
   },
+  // Step 5 confirm
+  {
+    id: 10,
+    stage: 'terminal',
+    title: 'Step 5: コミット履歴を確認',
+    description: 'コミットが反映されたことを確認します',
+    detailedInstructions: `
+## コミット履歴を確認
+
+\`git log\` を実行して最新のコミットが追加されていることを確認しましょう。
+ソース管理ビューでは変更がなくなっているはずです。
+
+確認できたら「次へ」を押して進みます。
+    `,
+    allowedCommands: ['status', 'log'],
+    hints: [
+      'git log で最新のコミットが追加されたことを確認してください',
+      'ソース管理ビューに変更が残っていないかをチェックしましょう',
+      '確認できたら「次へ」を押して先に進みます',
+    ],
+    successMessage: 'コミットが履歴に追加されていることを確認したら「次へ」を押してください。',
+    validationRules: [],
+    autoAdvance: false,
+  },
   // Step 6: git push
   {
-    id: 6,
+    id: 11,
     stage: 'terminal',
     title: 'Step 6: リモートにプッシュ',
     description: 'ローカルの変更をリモートリポジトリにプッシュします',
@@ -206,10 +329,34 @@ git push origin feature/add-greeting
       'ブランチ名は feature/add-greeting です',
       '正しいコマンド: git push origin feature/add-greeting',
     ],
-    successMessage: 'プッシュに成功しました！ターミナルステージをクリアしました！',
+    successMessage: 'プッシュに成功しました！',
     validationRules: [
       { type: 'pushed' },
     ],
+  },
+  // Step 6 confirm
+  {
+    id: 12,
+    stage: 'terminal',
+    title: 'Step 6: プッシュ結果を確認',
+    description: 'リモートへ反映されたことを確認します',
+    detailedInstructions: `
+## プッシュ結果を確認
+
+ターミナルの出力や \`git status\` を確認し、リモートにプッシュが成功したことを確認しましょう。
+\`git log\` を確認すると、最新のコミットがプッシュされたことがわかります。
+
+確認が終わったら「次へ」を押してGUIステージに進みます。
+    `,
+    allowedCommands: ['status', 'log'],
+    hints: [
+      'push コマンドの出力に「new branch」などが表示されているか確認しましょう',
+      'git status で作業ツリーがクリーンになっていることを確認してください',
+      '確認できたら「次へ」を押してGUIステージに進みます',
+    ],
+    successMessage: 'プッシュの結果を確認できたら「次へ」を押してGUIステージへ進みましょう。',
+    validationRules: [],
+    autoAdvance: false,
   },
 ];
 

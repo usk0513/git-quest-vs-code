@@ -36,7 +36,7 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext }
           </div>
         )}
 
-        {step.id === 0 && onNext && (
+        {onNext && step.autoAdvance === false && (
           <div className="mt-4">
             <Button onClick={onNext} className="w-full">
               次へ →

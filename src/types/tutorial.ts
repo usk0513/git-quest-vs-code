@@ -13,6 +13,7 @@ export interface StepConfig {
   hints: string[];
   successMessage: string;
   validationRules: ValidationRule[];
+  autoAdvance?: boolean;
 }
 
 export type GuiAction =

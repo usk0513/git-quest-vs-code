@@ -19,6 +19,10 @@ export class TutorialService {
   private currentStepConfig: StepConfig;
   private pushedBranches: Set<string> = new Set();
 
+  private isAutoAdvance(step: StepConfig): boolean {
+    return step.autoAdvance !== false;
+  }
+
   constructor(
     fileSystem: FileSystemService,
     gitService: GitService,
@@ -389,51 +393,54 @@ export class TutorialService {
       WORKSPACE_DIR
     );
 
-    if (validation.passed) {
+    if (validation.passed && this.isAutoAdvance(this.currentStepConfig)) {
       this.advanceStep();
     }
   }
 
   private advanceStep(): void {
-    const nextStepId = this.state.currentStep + 1;
+    if (this.state.currentStage === 'terminal') {
+      const currentIndex = TUTORIAL_STEPS.findIndex(
+        (step) => step.id === this.state.currentStep
+      );
+      const nextStep = currentIndex >= 0 ? TUTORIAL_STEPS[currentIndex + 1] : undefined;
 
-    // Check if terminal stage is completed (step 6)
-    if (nextStepId === 7) {
+      if (nextStep) {
+        this.state.currentStep = nextStep.id;
+        this.currentStepConfig = nextStep;
+        return;
+      }
+
       this.state.terminalStageCompleted = true;
       this.state.currentStage = 'gui';
-      this.state.currentStep = 21; // Start GUI stage at step 21
-      this.currentStepConfig = GUI_TUTORIAL_STEPS[0];
-      return;
-    }
 
-    // Check if GUI stage is completed (step 61)
-    if (nextStepId === 62) {
-      this.state.guiStageCompleted = true;
-      this.state.isCompleted = true;
-      return;
-    }
-
-    // Find next step in appropriate stage
-    if (this.state.currentStage === 'terminal') {
-      const nextStep = TUTORIAL_STEPS.find((step) => step.id === nextStepId);
-      if (nextStep) {
-        this.state.currentStep = nextStepId;
-        this.currentStepConfig = nextStep;
+      const firstGuiStep = GUI_TUTORIAL_STEPS[0];
+      if (firstGuiStep) {
+        this.state.currentStep = firstGuiStep.id;
+        this.currentStepConfig = firstGuiStep;
+      } else {
+        this.state.isCompleted = true;
       }
     } else {
-      const nextStep = GUI_TUTORIAL_STEPS.find((step) => step.id === nextStepId);
+      const currentIndex = GUI_TUTORIAL_STEPS.findIndex(
+        (step) => step.id === this.state.currentStep
+      );
+      const nextStep =
+        currentIndex >= 0 ? GUI_TUTORIAL_STEPS[currentIndex + 1] : undefined;
+
       if (nextStep) {
-        this.state.currentStep = nextStepId;
+        this.state.currentStep = nextStep.id;
         this.currentStepConfig = nextStep;
+      } else {
+        this.state.guiStageCompleted = true;
+        this.state.isCompleted = true;
       }
     }
   }
 
   async nextStep(): Promise<void> {
-    // Only allow manual advancement from step 0
-    if (this.state.currentStep === 0) {
-      this.state.currentStep = 1;
-      this.currentStepConfig = TUTORIAL_STEPS[1];
+    if (!this.isAutoAdvance(this.currentStepConfig)) {
+      this.advanceStep();
     }
   }
 
