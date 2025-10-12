@@ -285,7 +285,7 @@ git commit -m "Add greeting message"
     ],
     successMessage: 'コミットに成功しました！',
     validationRules: [
-      { type: 'commit-made' },
+      { type: 'commit-made', expectedValue: 2 },
     ],
   },
   // Step 5 confirm
@@ -477,7 +477,7 @@ VS Codeと同じ操作でブランチを作成できます！
     ],
     successMessage: 'GUIでコミットできました！',
     validationRules: [
-      { type: 'commit-made' },
+      { type: 'commit-made', expectedValue: 3 },
     ],
   },
   // Step 6-1: git push (GUI)

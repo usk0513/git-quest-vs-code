@@ -39,7 +39,7 @@ export class StepValidator {
         return this.validateFileStaged(rule.target!, gitState);
 
       case 'commit-made':
-        return this.validateCommitMade(gitState);
+        return this.validateCommitMade(rule, gitState);
 
       case 'branch-created':
         return this.validateBranchCreated(rule.target!, gitState);
@@ -103,12 +103,17 @@ export class StepValidator {
     };
   }
 
-  private validateCommitMade(gitState: GitState): ValidationResult {
-    if (gitState.commits.length === 0) {
+  private validateCommitMade(rule: ValidationRule, gitState: GitState): ValidationResult {
+    const minCommits =
+      typeof rule.expectedValue === 'number' && !Number.isNaN(rule.expectedValue)
+        ? rule.expectedValue
+        : 1;
+
+    if (gitState.commits.length < minCommits) {
       return {
         passed: false,
-        message: 'No commits made yet',
-        hint: 'Use git commit to create a commit',
+        message: 'No new commits detected',
+        hint: 'Use git commit to record your changes',
       };
     }
 
