@@ -1,9 +1,4 @@
-import {
-  CommandExecutionResult,
-  ValidationResult,
-  TutorialState,
-  StepConfig,
-} from '@/types';
+import { CommandExecutionResult, TutorialState, StepConfig } from '@/types';
 import { FileSystemService } from '../filesystem/FileSystemService';
 import { GitService } from '../git/GitService';
 import { GitValidator } from '../git/GitValidator';
@@ -111,7 +106,7 @@ export class TutorialService {
     try {
       switch (parsed.command) {
         case 'clone':
-          return await this.handleClone(parsed);
+          return await this.handleClone();
 
         case 'checkout':
           return await this.handleCheckout(parsed);
@@ -150,7 +145,7 @@ export class TutorialService {
     }
   }
 
-  private async handleClone(parsed: any): Promise<CommandExecutionResult> {
+  private async handleClone(): Promise<CommandExecutionResult> {
     try {
       await this.remoteSimulator.cloneToWorkspace(WORKSPACE_DIR);
 

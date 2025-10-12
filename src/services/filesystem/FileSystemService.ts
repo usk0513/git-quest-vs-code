@@ -1,11 +1,42 @@
-import FS from '@isomorphic-git/lightning-fs';
+import * as LightningFSModule from '@isomorphic-git/lightning-fs';
+
+type LightningFSInstance = {
+  promises: {
+    readFile(path: string, options: { encoding: 'utf8' }): Promise<string | Uint8Array>;
+    writeFile(path: string, content: string, options: { encoding: 'utf8' }): Promise<void>;
+    unlink(path: string, options?: unknown): Promise<void>;
+    readdir(path: string, options?: unknown): Promise<string[]>;
+    mkdir(path: string, options?: unknown): Promise<void>;
+    rmdir(path: string, options?: unknown): Promise<void>;
+    stat(path: string, options?: unknown): Promise<{ isDirectory(): boolean }>;
+    lstat(path: string, options?: unknown): Promise<{ isDirectory(): boolean }>;
+    readlink?(path: string, options?: unknown): Promise<string>;
+    symlink?(target: string, path: string): Promise<void>;
+    chmod?(path: string, mode: number): Promise<void>;
+    backFile?(path: string, options?: unknown): Promise<void>;
+    du?(path: string): Promise<number>;
+    flush?(): Promise<void>;
+  };
+};
+
+type LightningFSConstructor = new (
+  name: string,
+  options?: {
+    wipe?: boolean;
+  }
+) => LightningFSInstance;
+
+// Normalize CommonJS export shape so Vite can import it safely in ESM mode.
+const LightningFS: LightningFSConstructor =
+  (LightningFSModule as { default?: LightningFSConstructor }).default ??
+  (LightningFSModule as unknown as LightningFSConstructor);
 
 export class FileSystemService {
-  private fs: FS;
-  public pfs: FS['promises'];
+  private fs: LightningFSInstance;
+  public pfs: LightningFSInstance['promises'];
 
   constructor(name: string = 'fs', wipe: boolean = false) {
-    this.fs = new FS(name, { wipe });
+    this.fs = new LightningFS(name, { wipe });
     this.pfs = this.fs.promises;
   }
 
