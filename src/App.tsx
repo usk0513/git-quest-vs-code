@@ -28,6 +28,7 @@ function App() {
     commit,
     push,
     validateCurrentStep,
+    switchBranch,
   } = useAppStore();
 
   useEffect(() => {
@@ -106,7 +107,11 @@ function App() {
       </div>
 
       {/* Status bar */}
-      <StatusBar currentBranch={gitState.currentBranch} />
+      <StatusBar
+        currentBranch={gitState.currentBranch}
+        branches={gitState.branches}
+        onSwitchBranch={switchBranch}
+      />
     </div>
   );
 }

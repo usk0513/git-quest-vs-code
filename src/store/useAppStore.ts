@@ -39,6 +39,7 @@ interface AppState {
   commit: (message: string) => Promise<void>;
   push: () => Promise<void>;
   validateCurrentStep: () => Promise<void>;
+  switchBranch: (branch: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -349,5 +350,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     const tutorialState = tutorialService.getState();
 
     set({ currentStep, tutorialState });
+  },
+
+  switchBranch: async (branch: string) => {
+    const { tutorialService } = get();
+
+    if (!tutorialService) {
+      return;
+    }
+
+    try {
+      await tutorialService.executeCommand(`git checkout ${branch}`);
+      await get().refreshGitState();
+    } catch (error) {
+      console.error('Error switching branch:', error);
+    }
   },
 }));
