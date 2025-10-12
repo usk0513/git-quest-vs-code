@@ -55,7 +55,7 @@ export class StepValidator {
         );
 
       case 'pushed':
-        return this.validatePushed();
+        return this.validatePushed(rule);
 
       default:
         return {
@@ -191,9 +191,15 @@ export class StepValidator {
     }
   }
 
-  private validatePushed(): ValidationResult {
-    // For simulation purposes, we assume push is always successful
-    // In real scenario, we would check remote state
+  private validatePushed(rule: ValidationRule): ValidationResult {
+    if (rule.expectedValue !== true) {
+      return {
+        passed: false,
+        message: 'Push not detected yet',
+        hint: 'Use git push origin <branch> to push your commits',
+      };
+    }
+
     return {
       passed: true,
       message: 'Changes pushed to remote',

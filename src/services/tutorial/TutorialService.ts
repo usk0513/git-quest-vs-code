@@ -406,11 +406,10 @@ export class TutorialService {
     const rules = this.currentStepConfig.validationRules.map((rule) => {
       if (rule.type === 'pushed') {
         const currentBranch = gitState.currentBranch;
-        if (this.pushedBranches.has(currentBranch)) {
-          return rule;
-        } else {
-          return { ...rule, type: 'pushed' as const };
-        }
+        return {
+          ...rule,
+          expectedValue: this.pushedBranches.has(currentBranch),
+        };
       }
       return rule;
     });
