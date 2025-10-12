@@ -27,6 +27,7 @@ function App() {
     stageFile,
     commit,
     push,
+    validateCurrentStep,
   } = useAppStore();
 
   useEffect(() => {
@@ -94,6 +95,7 @@ function App() {
           <InstructionPane
             step={currentStep}
             onNext={currentStep.autoAdvance === false ? nextStep : undefined}
+            onValidate={currentStep.requiresValidationButton ? validateCurrentStep : undefined}
           />
         </div>
       </div>

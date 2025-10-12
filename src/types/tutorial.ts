@@ -10,6 +10,9 @@ export interface StepConfig {
   detailedInstructions: string;
   allowedCommands: GitCommand[];
   allowedGuiActions?: GuiAction[];
+  allowBranchCreation?: boolean;
+  requiresValidationButton?: boolean;
+  validationButtonLabel?: string;
   hints: string[];
   successMessage: string;
   validationRules: ValidationRule[];
@@ -42,6 +45,8 @@ export interface CommandExecutionResult {
   output: string;
   error?: string;
   hint?: string;
+  stepCompleted?: boolean;
+  validationResult?: ValidationResult;
 }
 
 export interface TutorialState {

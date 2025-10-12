@@ -10,6 +10,12 @@ describe('GitValidator', () => {
       expect(result.passed).toBe(true);
     });
 
+    it('should reject git clone command with invalid repository path', () => {
+      const result = validator.validateCommand('git clone https://github.com/example/repo.git', ['clone']);
+      expect(result.passed).toBe(false);
+      expect(result.message).toContain('not found');
+    });
+
     it('should reject git push when only clone is allowed', () => {
       const result = validator.validateCommand('git push origin main', ['clone']);
       expect(result.passed).toBe(false);
@@ -49,14 +55,28 @@ describe('GitValidator', () => {
       expect(result.passed).toBe(false);
     });
 
-    it('should validate git checkout -b with branch name', () => {
-      const result = validator.validateCommand('git checkout -b feature/test', ['checkout']);
+    it('should validate git checkout -b with allowed branch name', () => {
+      const result = validator.validateCommand('git checkout -b feature/add-greeting', ['checkout']);
       expect(result.passed).toBe(true);
     });
 
     it('should reject git checkout -b without branch name', () => {
       const result = validator.validateCommand('git checkout -b', ['checkout']);
       expect(result.passed).toBe(false);
+    });
+
+    it('should reject git checkout -b with disallowed branch name', () => {
+      const result = validator.validateCommand('git checkout -b feature/test', ['checkout']);
+      expect(result.passed).toBe(false);
+      expect(result.message).toContain('not allowed');
+    });
+
+    it('should reject git branch creation when not allowed in step', () => {
+      const result = validator.validateCommand('git branch feature/add-greeting', ['branch'], {
+        allowBranchCreation: false,
+      });
+      expect(result.passed).toBe(false);
+      expect(result.message).toContain('not allowed');
     });
 
     it('should validate git push with remote and branch', () => {
@@ -68,6 +88,23 @@ describe('GitValidator', () => {
       const result = validator.validateCommand('git push', ['push']);
       expect(result.passed).toBe(false);
       expect(result.message).toContain('requires remote and branch');
+    });
+
+    it('should reject git branch with unsupported flags', () => {
+      const result = validator.validateCommand('git branch -v', ['branch']);
+      expect(result.passed).toBe(false);
+      expect(result.message).toContain('Unsupported flag');
+    });
+
+    it('should reject git branch with disallowed branch name', () => {
+      const result = validator.validateCommand('git branch feature/test', ['branch']);
+      expect(result.passed).toBe(false);
+      expect(result.message).toContain('not allowed');
+    });
+
+    it('should allow git branch with allowed branch name', () => {
+      const result = validator.validateCommand('git branch feature/add-greeting', ['branch']);
+      expect(result.passed).toBe(true);
     });
   });
 });

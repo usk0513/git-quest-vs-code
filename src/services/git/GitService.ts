@@ -2,6 +2,11 @@ import git from 'isomorphic-git';
 import { FileSystemService } from '../filesystem/FileSystemService';
 import { GitState, GitFile, GitCommit } from '@/types';
 
+type DiffLine = {
+  type: 'context' | 'add' | 'remove';
+  content: string;
+};
+
 export class GitService {
   private fs: FileSystemService;
 
@@ -177,5 +182,127 @@ export class GitService {
         hasRemote: false,
       };
     }
+  }
+
+  async diff(dir: string, filepath?: string): Promise<string> {
+    const statusMatrix = await git.statusMatrix({ fs: this.fs.getFS(), dir });
+    const targets = statusMatrix.filter(([path, head, workdir, stage]) => {
+      if (filepath && filepath !== path) {
+        return false;
+      }
+      return head !== workdir || workdir !== stage;
+    });
+
+    if (targets.length === 0) {
+      return 'No differences';
+    }
+
+    const results: string[] = [];
+
+    for (const [path, headStatus, workdirStatus] of targets) {
+      const oldContent = await this.getHeadFileContent(dir, path, headStatus !== 0);
+      const newContent = await this.getWorkingTreeContent(dir, path, workdirStatus !== 0);
+      const diffLines = this.createUnifiedDiff(path, oldContent, newContent);
+      results.push(diffLines.join('\n'));
+    }
+
+    return results.join('\n\n');
+  }
+
+  private async getHeadFileContent(dir: string, filepath: string, existsInHead: boolean): Promise<string> {
+    if (!existsInHead) {
+      return '';
+    }
+
+    try {
+      const oid = await git.resolveRef({ fs: this.fs.getFS(), dir, ref: 'HEAD' });
+      const { blob } = await git.readBlob({ fs: this.fs.getFS(), dir, oid, filepath });
+      return new TextDecoder('utf-8').decode(blob);
+    } catch {
+      return '';
+    }
+  }
+
+  private async getWorkingTreeContent(dir: string, filepath: string, existsInWorkdir: boolean): Promise<string> {
+    if (!existsInWorkdir) {
+      return '';
+    }
+
+    try {
+      return await this.fs.readFile(`${dir}/${filepath}`);
+    } catch {
+      return '';
+    }
+  }
+
+  private createUnifiedDiff(filepath: string, oldContent: string, newContent: string): string[] {
+    const oldLines = oldContent.split(/\r?\n/);
+    const newLines = newContent.split(/\r?\n/);
+    const diffs = this.computeDiffLines(oldLines, newLines);
+
+    const header = [
+      `diff --git a/${filepath} b/${filepath}`,
+      `--- a/${filepath}`,
+      `+++ b/${filepath}`,
+    ];
+
+    if (diffs.length === 0) {
+      return [...header, 'No changes'];
+    }
+
+    return [...header, '@@', ...diffs.map((line) => {
+      switch (line.type) {
+        case 'add':
+          return `+${line.content}`;
+        case 'remove':
+          return `-${line.content}`;
+        default:
+          return ` ${line.content}`;
+      }
+    })];
+  }
+
+  private computeDiffLines(oldLines: string[], newLines: string[]): DiffLine[] {
+    const m = oldLines.length;
+    const n = newLines.length;
+    const lcs: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+    for (let i = m - 1; i >= 0; i--) {
+      for (let j = n - 1; j >= 0; j--) {
+        if (oldLines[i] === newLines[j]) {
+          lcs[i][j] = lcs[i + 1][j + 1] + 1;
+        } else {
+          lcs[i][j] = Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+        }
+      }
+    }
+
+    const result: DiffLine[] = [];
+    let i = 0;
+    let j = 0;
+
+    while (i < m && j < n) {
+      if (oldLines[i] === newLines[j]) {
+        result.push({ type: 'context', content: oldLines[i] });
+        i++;
+        j++;
+      } else if (lcs[i][j + 1] >= lcs[i + 1][j]) {
+        result.push({ type: 'add', content: newLines[j] });
+        j++;
+      } else {
+        result.push({ type: 'remove', content: oldLines[i] });
+        i++;
+      }
+    }
+
+    while (i < m) {
+      result.push({ type: 'remove', content: oldLines[i++] });
+    }
+
+    while (j < n) {
+      result.push({ type: 'add', content: newLines[j++] });
+    }
+
+    return result;
   }
 }

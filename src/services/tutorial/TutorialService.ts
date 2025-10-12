@@ -1,4 +1,4 @@
-import { CommandExecutionResult, TutorialState, StepConfig } from '@/types';
+import { CommandExecutionResult, TutorialState, StepConfig, ValidationResult } from '@/types';
 import { FileSystemService } from '../filesystem/FileSystemService';
 import { GitService } from '../git/GitService';
 import { GitValidator } from '../git/GitValidator';
@@ -73,7 +73,10 @@ export class TutorialService {
       // Validate command
       const validation = this.validator.validateCommand(
         commandString,
-        this.currentStepConfig.allowedCommands
+        this.currentStepConfig.allowedCommands,
+        {
+          allowBranchCreation: this.currentStepConfig.allowBranchCreation,
+        }
       );
 
       if (!validation.passed) {
@@ -91,12 +94,17 @@ export class TutorialService {
       // Execute command
       const result = await this.executeGitCommand(parsed);
 
+      let validationResult: ValidationResult | null = null;
       if (result.success) {
         // Check if step is completed
-        await this.checkStepCompletion();
+        validationResult = await this.checkStepCompletion();
       }
 
-      return result;
+      return {
+        ...result,
+        stepCompleted: validationResult?.passed ?? false,
+        validationResult: validationResult ?? undefined,
+      };
     } catch (error: any) {
       return {
         success: false,
@@ -132,6 +140,9 @@ export class TutorialService {
 
         case 'log':
           return await this.handleLog();
+
+        case 'diff':
+          return await this.handleDiff(parsed);
 
         default:
           return {
@@ -371,7 +382,24 @@ export class TutorialService {
     }
   }
 
-  private async checkStepCompletion(): Promise<void> {
+  private async handleDiff(parsed: any): Promise<CommandExecutionResult> {
+    try {
+      const filepath = parsed.args[0];
+      const diffOutput = await this.git.diff(WORKSPACE_DIR, filepath);
+      return {
+        success: true,
+        output: diffOutput,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        output: '',
+        error: error.message || 'Failed to generate diff',
+      };
+    }
+  }
+
+  private async checkStepCompletion(): Promise<ValidationResult> {
     const gitState = await this.git.getGitState(WORKSPACE_DIR);
 
     // For push validation, check if branch was pushed
@@ -393,9 +421,22 @@ export class TutorialService {
       WORKSPACE_DIR
     );
 
-    if (validation.passed && this.isAutoAdvance(this.currentStepConfig)) {
+    if (!validation.passed) {
+      return validation;
+    }
+
+    if (this.isAutoAdvance(this.currentStepConfig)) {
       this.advanceStep();
     }
+
+    return {
+      passed: true,
+      message: this.currentStepConfig.successMessage || validation.message,
+    };
+  }
+
+  async validateCurrentStep(): Promise<ValidationResult> {
+    return await this.checkStepCompletion();
   }
 
   private advanceStep(): void {

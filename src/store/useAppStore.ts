@@ -38,6 +38,7 @@ interface AppState {
   stageFile: (filepath: string) => Promise<void>;
   commit: (message: string) => Promise<void>;
   push: () => Promise<void>;
+  validateCurrentStep: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -112,6 +113,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       return;
     }
 
+    const previousStep = tutorialService.getCurrentStep();
+
     // Add command to output
     set({
       terminalOutput: [...terminalOutput, `$ ${command}`],
@@ -120,7 +123,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       const result: CommandExecutionResult = await tutorialService.executeCommand(command);
 
-      // Add result to output
       const newOutput = [...get().terminalOutput];
       if (result.output) {
         newOutput.push(result.output);
@@ -131,6 +133,18 @@ export const useAppStore = create<AppState>((set, get) => ({
           newOutput.push(`Hint: ${result.hint}`);
         }
       }
+
+      if (result.validationResult && !result.validationResult.passed) {
+        newOutput.push(result.validationResult.message);
+        if (result.validationResult.hint) {
+          newOutput.push(`Hint: ${result.validationResult.hint}`);
+        }
+      }
+
+      if (result.success && result.stepCompleted && previousStep.successMessage) {
+        newOutput.push(`✓ ${previousStep.successMessage}`);
+      }
+
       newOutput.push('');
 
       set({ terminalOutput: newOutput });
@@ -143,12 +157,6 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       set({ currentStep, tutorialState });
 
-      // If step completed, show success message
-      if (result.success && currentStep.successMessage) {
-        set({
-          terminalOutput: [...get().terminalOutput, `✓ ${currentStep.successMessage}`, ''],
-        });
-      }
     } catch (error: any) {
       set({
         terminalOutput: [
@@ -308,5 +316,38 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error('Error pushing:', error);
     }
+  },
+
+  validateCurrentStep: async () => {
+    const { tutorialService } = get();
+
+    if (!tutorialService) {
+      return;
+    }
+
+    const previousStep = tutorialService.getCurrentStep();
+
+    const validation = await tutorialService.validateCurrentStep();
+
+    const newOutput = [...get().terminalOutput];
+    if (validation.passed) {
+      if (previousStep.successMessage) {
+        newOutput.push(`✓ ${previousStep.successMessage}`);
+      }
+    } else {
+      newOutput.push(validation.message);
+      if (validation.hint) {
+        newOutput.push(`Hint: ${validation.hint}`);
+      }
+    }
+    newOutput.push('');
+    set({ terminalOutput: newOutput });
+
+    await get().refreshGitState();
+
+    const currentStep = tutorialService.getCurrentStep();
+    const tutorialState = tutorialService.getState();
+
+    set({ currentStep, tutorialState });
   },
 }));

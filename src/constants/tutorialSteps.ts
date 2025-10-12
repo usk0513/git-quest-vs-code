@@ -68,7 +68,7 @@ git clone /remote-repo
     detailedInstructions: `
 ## クローン結果を確認
 
-左側のエクスプローラービューを開き、\`README.md\` や \`greeting.txt\` が表示されているか確認しましょう。
+エクスプローラービュー(一番左の📁アイコン)を開き、\`README.md\` や \`greeting.txt\` が表示されているか確認しましょう。
 リモートから取得したファイルがローカルに展開されていることがわかります。
 
 必要に応じて \`git status\` や \`git branch\` を実行して、ワークスペースの状態を確認しても構いません。
@@ -76,6 +76,7 @@ git clone /remote-repo
 確認が終わったら、右上の「次へ」ボタンを押して次のステップへ進んでください。
     `,
     allowedCommands: ['status', 'branch', 'log'],
+    allowBranchCreation: false,
     hints: [
       'エクスプローラーに README.md や greeting.txt が表示されているか確認しましょう',
       'git status で作業ツリーがクリーンなことを確認できます',
@@ -135,6 +136,7 @@ git checkout feature/add-greeting
 確認できたら「次へ」を押して次に進みます。
     `,
     allowedCommands: ['branch', 'status', 'log'],
+    allowBranchCreation: false,
     hints: [
       'git branch で現在のブランチを確認できます',
       'ステータスバーに表示されるブランチ名も確認してみましょう',
@@ -160,8 +162,12 @@ Hello, Git!
 \`\`\`
 
 ファイルを編集すると、左側のソース管理パネルに変更が表示されます。
+
+編集が終わったら、右側の「編集内容をチェック」ボタンを押して変更が認識されているか確認しましょう。
     `,
     allowedCommands: ['status', 'diff'],
+    requiresValidationButton: true,
+    validationButtonLabel: '編集内容をチェック',
     hints: [
       'エディタで greeting.txt を開いてください',
       '"Hello, Git!" というテキストを追加してください',

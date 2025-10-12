@@ -5,9 +5,10 @@ import { Button } from '../Common/Button';
 interface InstructionPaneProps {
   step: StepConfig;
   onNext?: () => void;
+  onValidate?: () => void;
 }
 
-export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext }) => {
+export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, onValidate }) => {
   return (
     <div className="h-full bg-vscode-bg border-l border-vscode-border overflow-y-auto">
       <div className="p-4">
@@ -33,6 +34,14 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext }
                 <li key={index}>• {hint}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {step.requiresValidationButton && onValidate && (
+          <div className="mt-4">
+            <Button onClick={onValidate} className="w-full">
+              {step.validationButtonLabel ?? '結果をチェック'}
+            </Button>
           </div>
         )}
 

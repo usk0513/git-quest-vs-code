@@ -1,6 +1,10 @@
 import { GitCommand, ValidationResult } from '@/types';
 import { CommandParser } from '../terminal/CommandParser';
 
+interface CommandValidationOptions {
+  allowBranchCreation?: boolean;
+}
+
 export class GitValidator {
   private parser: CommandParser;
 
@@ -10,7 +14,8 @@ export class GitValidator {
 
   validateCommand(
     commandString: string,
-    allowedCommands: GitCommand[]
+    allowedCommands: GitCommand[],
+    options: CommandValidationOptions = {}
   ): ValidationResult {
     try {
       // Check if it's a git command
@@ -35,7 +40,7 @@ export class GitValidator {
       }
 
       // Command-specific validation
-      const validation = this.validateSpecificCommand(parsed);
+      const validation = this.validateSpecificCommand(parsed, options);
       if (!validation.passed) {
         return validation;
       }
@@ -53,7 +58,13 @@ export class GitValidator {
     }
   }
 
-  private validateSpecificCommand(parsed: any): ValidationResult {
+  private validateSpecificCommand(
+    parsed: any,
+    options: CommandValidationOptions
+  ): ValidationResult {
+    const allowedBranchNames = ['feature/add-greeting'];
+    const allowBranchCreation = options.allowBranchCreation !== false;
+
     switch (parsed.command) {
       case 'clone':
         if (parsed.args.length === 0) {
@@ -61,6 +72,13 @@ export class GitValidator {
             passed: false,
             message: 'git clone requires a repository path',
             hint: 'Usage: git clone <repository>',
+          };
+        }
+        if (parsed.args[0] !== '/remote-repo') {
+          return {
+            passed: false,
+            message: `Repository "${parsed.args[0]}" not found`,
+            hint: 'Use git clone /remote-repo for this tutorial step',
           };
         }
         break;
@@ -107,10 +125,51 @@ export class GitValidator {
             hint: 'Usage: git checkout <branch-name>',
           };
         }
+
+        if (parsed.branchName && !allowedBranchNames.includes(parsed.branchName)) {
+          return {
+            passed: false,
+            message: `Branch "${parsed.branchName}" is not allowed in this tutorial`,
+            hint: `Use git checkout -b ${allowedBranchNames[0]}`,
+          };
+        }
         break;
 
       case 'branch':
-        // git branch is OK with or without args
+        if (parsed.flags.length > 0) {
+          return {
+            passed: false,
+            message: 'Unsupported flag for git branch in this tutorial',
+            hint: 'Use git branch <branch-name> or git branch to list branches',
+          };
+        }
+
+        if (!allowBranchCreation && parsed.args.length > 0) {
+          return {
+            passed: false,
+            message: 'Branch creation is not allowed in this step',
+            hint: 'Use git branch to list existing branches and press 次へ to continue',
+          };
+        }
+
+        if (parsed.args.length > 1) {
+          return {
+            passed: false,
+            message: 'Too many arguments for git branch',
+            hint: `Usage: git branch ${allowedBranchNames[0]}`,
+          };
+        }
+
+        if (
+          parsed.args.length === 1 &&
+          (!allowBranchCreation || !allowedBranchNames.includes(parsed.args[0]))
+        ) {
+          return {
+            passed: false,
+            message: `Branch "${parsed.args[0]}" is not allowed in this tutorial`,
+            hint: `Use git branch ${allowedBranchNames[0]}`,
+          };
+        }
         break;
 
       case 'push':
