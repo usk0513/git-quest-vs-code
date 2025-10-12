@@ -379,16 +379,16 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 
 まずは作業ブランチからメインブランチに戻りましょう。
 
-1. 画面上部中央のブランチメニュー（現在は feature/add-greeting）をクリック
-2. 表示された一覧から main を選択
+1. 画面左下のブランチ名（現在は feature/add-greeting）をクリック
+2. 画面中央に表示されるブランチメニューから main を選択
 
 切り替え後、ステータスバーに main と表示されることを確認してください。
     `,
     allowedCommands: ['status', 'log', 'branch'],
     allowedGuiActions: ['switch-branch'],
     hints: [
-      '画面上部中央のブランチ名をクリックして一覧を開きます',
-      'main を選択するとメインブランチに切り替わります',
+      '画面左下のブランチ名をクリックして一覧を開きます',
+      '表示されたメニューから main を選択します',
     ],
     successMessage: 'メインブランチに切り替わりました！',
     validationRules: [
@@ -407,8 +407,8 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 
 今度は、コマンドではなくGUIを使って操作してみましょう。
 
-1. 下部のステータスバーにあるブランチ名（main）をクリック
-2. 「新しいブランチを作成」を選択
+1. 画面左下のブランチ名（main）をクリック
+2. 画面中央に表示されるメニューで「+ 新しいブランチの作成...」を選択
 3. ブランチ名を入力: feature/gui-test
 4. Enterキーを押して確定
 
@@ -418,8 +418,8 @@ VS Codeと同じ操作でブランチを作成できます！
     allowBranchCreation: false,
     allowedGuiActions: ['create-branch', 'switch-branch'],
     hints: [
-      'ステータスバーのブランチ名をクリックしてください',
-      'ブランチ名は feature/gui-test にしてください',
+      '画面左下のブランチ名をクリックしてください',
+      'メニューから「+ 新しいブランチの作成...」を選んで feature/gui-test と入力してください',
     ],
     successMessage: 'GUIでブランチを作成できました！',
     validationRules: [

@@ -40,6 +40,7 @@ interface AppState {
   push: () => Promise<void>;
   validateCurrentStep: () => Promise<void>;
   switchBranch: (branch: string) => Promise<void>;
+  createBranch: (branch: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -364,6 +365,21 @@ export const useAppStore = create<AppState>((set, get) => ({
       await get().refreshGitState();
     } catch (error) {
       console.error('Error switching branch:', error);
+    }
+  },
+
+  createBranch: async (branch: string) => {
+    const { tutorialService } = get();
+
+    if (!tutorialService || !branch.trim()) {
+      return;
+    }
+
+    try {
+      await tutorialService.executeCommand(`git checkout -b ${branch.trim()}`, { skipValidation: true });
+      await get().refreshGitState();
+    } catch (error) {
+      console.error('Error creating branch:', error);
     }
   },
 }));

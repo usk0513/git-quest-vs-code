@@ -29,6 +29,7 @@ function App() {
     push,
     validateCurrentStep,
     switchBranch,
+    createBranch,
   } = useAppStore();
 
   useEffect(() => {
@@ -57,16 +58,23 @@ function App() {
       ? 'コマンドステージ（Gitコマンド操作を学習中）'
       : 'GUIステージ（VS Code操作を学習中）';
 
+  const handleCreateBranch = () => {
+    if (currentStep.stage !== 'gui') {
+      return;
+    }
+
+    const suggestedName = currentStep.id === 21 ? 'feature/gui-test' : 'feature/new-branch';
+    const input = window.prompt('新しいブランチ名を入力してください', suggestedName);
+    if (!input) {
+      return;
+    }
+    createBranch(input);
+  };
+
   return (
     <div className="w-screen h-screen bg-vscode-bg flex flex-col overflow-hidden">
       {/* Header */}
-      <Header
-        onReset={reset}
-        modeLabel={modeLabel}
-        currentBranch={gitState.currentBranch}
-        branches={gitState.branches}
-        onSwitchBranch={switchBranch}
-      />
+      <Header onReset={reset} modeLabel={modeLabel} />
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
@@ -114,7 +122,13 @@ function App() {
       </div>
 
       {/* Status bar */}
-      <StatusBar currentBranch={gitState.currentBranch} />
+      <StatusBar
+        currentBranch={gitState.currentBranch}
+        branches={gitState.branches}
+        onSwitchBranch={switchBranch}
+        onCreateBranch={handleCreateBranch}
+        menuEnabled={currentStep.stage === 'gui'}
+      />
     </div>
   );
 }
