@@ -34,16 +34,23 @@ Git Questへようこそ！
 リモートリポジトリをローカルにコピー（クローン）しましょう。
 
 \`\`\`bash
+git clone https://github.com/git-quest/sample-repo.git
+\`\`\`
+
+GitHubでは上記のようなHTTPS URLを指定してクローンします。
+このチュートリアルでは、シミュレーション環境のため以下のコマンドを実行してください：
+
+\`\`\`bash
 git clone /remote-repo
 \`\`\`
 
-このコマンドを実行すると、リモートリポジトリの内容がローカルにコピーされます。
+どちらも、リモートリポジトリの内容をローカルにコピーする操作です。
     `,
     allowedCommands: ['clone'],
     hints: [
       'git clone コマンドを使用します',
-      'クローン元のパスは /remote-repo です',
-      '正しいコマンド: git clone /remote-repo',
+      '通常のGitHub操作では https://github.com/... の形式です',
+      'この環境では git clone /remote-repo を実行してください',
     ],
     successMessage: 'クローンに成功しました！ワークスペースにファイルがコピーされました。',
     validationRules: [
