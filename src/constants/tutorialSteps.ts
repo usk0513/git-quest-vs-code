@@ -368,6 +368,34 @@ git push origin feature/add-greeting
 
 // GUI stage steps (Step 2-1 to 6-1)
 export const GUI_TUTORIAL_STEPS: StepConfig[] = [
+  // Step 1-1: Switch to main branch (GUI)
+  {
+    id: 20,
+    stage: 'gui',
+    title: 'Step 1: メインブランチに切り替え（GUI）',
+    description: 'GUIを使ってメインブランチに戻ります',
+    detailedInstructions: `
+## ブランチの切り替え（GUI操作）
+
+まずは作業ブランチからメインブランチに戻りましょう。
+
+1. 画面下部ステータスバーのブランチ名（現在は feature/add-greeting）をクリック
+2. ブランチ一覧から main を選択
+
+切り替え後、ステータスバーに main と表示されることを確認してください。
+    `,
+    allowedCommands: ['status', 'log', 'branch'],
+    allowedGuiActions: ['switch-branch'],
+    hints: [
+      'ステータスバーのブランチ名をクリックして一覧を開きます',
+      'main を選択するとメインブランチに切り替わります',
+    ],
+    successMessage: 'メインブランチに切り替わりました！',
+    validationRules: [
+      { type: 'branch-switched', target: 'main' },
+    ],
+    allowBranchCreation: false,
+  },
   // Step 2-1: Create branch (GUI)
   {
     id: 21,
