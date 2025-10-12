@@ -363,6 +363,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       await tutorialService.executeCommand(`git checkout ${branch}`, { skipValidation: true });
       await get().refreshGitState();
+
+      const currentStep = tutorialService.getCurrentStep();
+      const tutorialState = tutorialService.getState();
+      set({ currentStep, tutorialState });
     } catch (error) {
       console.error('Error switching branch:', error);
     }
@@ -378,6 +382,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       await tutorialService.executeCommand(`git checkout -b ${branch.trim()}`, { skipValidation: true });
       await get().refreshGitState();
+
+      const currentStep = tutorialService.getCurrentStep();
+      const tutorialState = tutorialService.getState();
+      set({ currentStep, tutorialState });
     } catch (error) {
       console.error('Error creating branch:', error);
     }
