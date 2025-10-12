@@ -60,7 +60,13 @@ function App() {
   return (
     <div className="w-screen h-screen bg-vscode-bg flex flex-col overflow-hidden">
       {/* Header */}
-      <Header onReset={reset} modeLabel={modeLabel} />
+      <Header
+        onReset={reset}
+        modeLabel={modeLabel}
+        currentBranch={gitState.currentBranch}
+        branches={gitState.branches}
+        onSwitchBranch={switchBranch}
+      />
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
@@ -107,11 +113,7 @@ function App() {
       </div>
 
       {/* Status bar */}
-      <StatusBar
-        currentBranch={gitState.currentBranch}
-        branches={gitState.branches}
-        onSwitchBranch={switchBranch}
-      />
+      <StatusBar currentBranch={gitState.currentBranch} />
     </div>
   );
 }

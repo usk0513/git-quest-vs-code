@@ -379,15 +379,15 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 
 まずは作業ブランチからメインブランチに戻りましょう。
 
-1. 画面下部ステータスバーのブランチ名（現在は feature/add-greeting）をクリック
-2. ブランチ一覧から main を選択
+1. 画面上部中央のブランチメニュー（現在は feature/add-greeting）をクリック
+2. 表示された一覧から main を選択
 
 切り替え後、ステータスバーに main と表示されることを確認してください。
     `,
     allowedCommands: ['status', 'log', 'branch'],
     allowedGuiActions: ['switch-branch'],
     hints: [
-      'ステータスバーのブランチ名をクリックして一覧を開きます',
+      '画面上部中央のブランチ名をクリックして一覧を開きます',
       'main を選択するとメインブランチに切り替わります',
     ],
     successMessage: 'メインブランチに切り替わりました！',

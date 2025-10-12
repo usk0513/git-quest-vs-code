@@ -279,7 +279,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       // Execute git add command internally
-      await tutorialService.executeCommand(`git add ${filepath}`);
+      await tutorialService.executeCommand(`git add ${filepath}`, { skipValidation: true });
       await get().refreshGitState();
     } catch (error) {
       console.error('Error staging file:', error);
@@ -295,7 +295,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     try {
-      await tutorialService.executeCommand(`git commit -m "${message}"`);
+      await tutorialService.executeCommand(`git commit -m "${message}"`, { skipValidation: true });
       await get().refreshGitState();
     } catch (error) {
       console.error('Error committing:', error);
@@ -312,7 +312,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       const branch = gitState.currentBranch;
-      await tutorialService.executeCommand(`git push origin ${branch}`);
+      await tutorialService.executeCommand(`git push origin ${branch}`, { skipValidation: true });
       await get().refreshGitState();
     } catch (error) {
       console.error('Error pushing:', error);
@@ -360,7 +360,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     try {
-      await tutorialService.executeCommand(`git checkout ${branch}`);
+      await tutorialService.executeCommand(`git checkout ${branch}`, { skipValidation: true });
       await get().refreshGitState();
     } catch (error) {
       console.error('Error switching branch:', error);

@@ -58,7 +58,10 @@ export class TutorialService {
     }
   }
 
-  async executeCommand(commandString: string): Promise<CommandExecutionResult> {
+  async executeCommand(
+    commandString: string,
+    options: { skipValidation?: boolean } = {}
+  ): Promise<CommandExecutionResult> {
     try {
       // Step 0 doesn't allow commands
       if (this.state.currentStep === 0) {
@@ -71,22 +74,24 @@ export class TutorialService {
       }
 
       // Validate command
-      const validation = this.validator.validateCommand(
-        commandString,
-        this.currentStepConfig.allowedCommands,
-        {
-          allowBranchCreation: this.currentStepConfig.allowBranchCreation,
-          allowMutatingCommands: this.currentStepConfig.stage === 'terminal',
-        }
-      );
+      if (!options.skipValidation) {
+        const validation = this.validator.validateCommand(
+          commandString,
+          this.currentStepConfig.allowedCommands,
+          {
+            allowBranchCreation: this.currentStepConfig.allowBranchCreation,
+            allowMutatingCommands: this.currentStepConfig.stage === 'terminal',
+          }
+        );
 
-      if (!validation.passed) {
-        return {
-          success: false,
-          output: '',
-          error: validation.message,
-          hint: validation.hint,
-        };
+        if (!validation.passed) {
+          return {
+            success: false,
+            output: '',
+            error: validation.message,
+            hint: validation.hint,
+          };
+        }
       }
 
       // Parse command
