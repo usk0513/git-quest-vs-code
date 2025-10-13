@@ -635,97 +635,78 @@ export class TutorialService {
 - GUI操作を内部的にコマンド実行に変換
 
 ```typescript
-// src/store/useAppStore.ts
-import { create } from 'zustand';
-
+// src/store/useAppStore.ts（抜粋）
 export const useAppStore = create<AppState>((set, get) => ({
-  // 初期状態
-  tutorialService: null,
-  gitState: /* 初期値 */,
-  currentStep: null,
-  terminalOutput: [],
-  // ...
+  // ...初期化処理は同じ...
 
-  // 初期化
-  initialize: async () => {
-    const fs = getFileSystemService();
-    const git = new GitService(fs);
-    const validator = new GitValidator();
-    const stepValidator = new StepValidator(fs);
-    const remoteSimulator = new RemoteSimulator(fs, git);
-    const parser = new CommandParser();
-
-    const tutorialService = new TutorialService(
-      fs,
-      git,
-      validator,
-      stepValidator,
-      remoteSimulator,
-      parser
-    );
-
-    await tutorialService.initialize();
-
-    set({
-      tutorialService,
-      currentStep: tutorialService.getCurrentStep(),
-      isInitialized: true,
-    });
-  },
-
-  // コマンド実行
-  executeCommand: async (command: string) => {
+  executeCommand: async (command: string, options: { skipValidation?: boolean } = {}) => {
     const { tutorialService } = get();
     if (!tutorialService) return;
 
-    // ターミナルに表示
     set({ terminalOutput: [...get().terminalOutput, `$ ${command}`] });
 
-    // 実行
-    const result = await tutorialService.executeCommand(command);
+    const result = await tutorialService.executeCommand(command, options);
 
-    // 結果を表示
     const newOutput = [...get().terminalOutput];
     if (result.output) newOutput.push(result.output);
     if (result.error) {
       newOutput.push(`Error: ${result.error}`);
       if (result.hint) newOutput.push(`Hint: ${result.hint}`);
     }
+    if (result.validationResult && !result.validationResult.passed) {
+      newOutput.push(result.validationResult.message);
+    }
+    set({ terminalOutput: [...newOutput, ''] });
 
-    set({ terminalOutput: newOutput });
-
-    // 状態更新
     await get().refreshGitState();
   },
 
-  // GUI操作：ステージング
   stageFile: async (filepath: string) => {
-    // 内部的にコマンド実行
-    await get().tutorialService?.executeCommand(`git add ${filepath}`);
+    await get().executeCommand(`git add ${filepath}`, { skipValidation: true });
     await get().refreshGitState();
   },
 
-  // GUI操作：コミット
   commit: async (message: string) => {
-    await get().tutorialService?.executeCommand(`git commit -m "${message}"`);
+    await get().executeCommand(`git commit -m "${message}"`, { skipValidation: true });
     await get().refreshGitState();
   },
 
-  // リセット
-  reset: async () => {
-    resetFileSystem();
-    await get().initialize();
-    set({ terminalOutput: ['Tutorial reset!'], currentFile: null });
+  push: async () => {
+    const branch = get().gitState.currentBranch;
+    await get().executeCommand(`git push origin ${branch}`, { skipValidation: true });
+    await get().refreshGitState();
   },
+
+  switchBranch: async (branch: string) => {
+    await get().executeCommand(`git checkout ${branch}`, { skipValidation: true });
+    await get().refreshGitState();
+    set({
+      currentStep: get().tutorialService?.getCurrentStep() ?? null,
+      tutorialState: get().tutorialService?.getState() ?? null,
+    });
+  },
+
+  createBranch: async (branch: string) => {
+    await get().executeCommand(`git checkout -b ${branch}`, { skipValidation: true });
+    await get().refreshGitState();
+    set({
+      currentStep: get().tutorialService?.getCurrentStep() ?? null,
+      tutorialState: get().tutorialService?.getState() ?? null,
+    });
+  },
+
+  // reset などは省略
 }));
 ```
+
+> 補足: GUIステージの操作は `skipValidation: true` を付けて同じコマンド実行パイプラインを通します。こうすることでターミナル入力とGUI操作の実装を共有しつつ、GUI専用のUIからでもチュートリアルの進捗が更新されます。
 
 ## 5. Phase 4: UIコンポーネント実装
 
 ### 5.1 App.tsx実装
 
 ```typescript
-// src/App.tsx
+// src/App.tsx（抜粋）
 function App() {
   const {
     isInitialized,
@@ -734,7 +715,12 @@ function App() {
     terminalOutput,
     initialize,
     executeCommand,
-    // ...
+    stageFile,
+    commit,
+    push,
+    validateCurrentStep,
+    switchBranch,
+    createBranch,
   } = useAppStore();
 
   useEffect(() => {
@@ -742,29 +728,64 @@ function App() {
   }, [initialize]);
 
   if (!isInitialized || !currentStep) {
-    return <div>Loading...</div>;
+    return <LoadingScreen />;
   }
 
-  return (
-    <div className="w-screen h-screen flex flex-col">
-      <Header onReset={reset} />
+  const modeLabel =
+    currentStep.stage === 'terminal'
+      ? 'コマンドステージ（Gitコマンド操作を学習中）'
+      : 'GUIステージ（VS Code操作を学習中）';
 
-      <div className="flex-1 flex">
-        <Sidebar /* props */ />
+  const handleCreateBranch = () => {
+    if (currentStep.stage !== 'gui') return;
+    const suggested = currentStep.id === 21 ? 'feature/gui-test' : 'feature/new-branch';
+    const name = window.prompt('新しいブランチ名を入力してください', suggested);
+    if (name) createBranch(name.trim());
+  };
+
+  return (
+    <div className="w-screen h-screen flex flex-col bg-vscode-bg">
+      <Header onReset={reset} modeLabel={modeLabel} />
+
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar
+          view={sidebarView}
+          onViewChange={setSidebarView}
+          gitState={gitState}
+          files={files}
+          currentFile={currentFile}
+          onSelectFile={selectFile}
+          onStageFile={stageFile}
+          onCommit={commit}
+          onPush={push}
+          sourceControlReadOnly={currentStep.stage === 'terminal'}
+        />
 
         <div className="flex-1 flex flex-col">
-          <EditorPane /* props */ />
-          <Terminal output={terminalOutput} onCommand={executeCommand} />
+          <EditorPane /* ... */ />
+          <Terminal output={terminalOutput} onCommand={(cmd) => executeCommand(cmd)} />
         </div>
 
-        <InstructionPane step={currentStep} />
+        <InstructionPane
+          step={currentStep}
+          onNext={currentStep.autoAdvance === false ? nextStep : undefined}
+          onValidate={currentStep.requiresValidationButton ? validateCurrentStep : undefined}
+        />
       </div>
 
-      <StatusBar currentBranch={gitState.currentBranch} />
+      <StatusBar
+        currentBranch={gitState.currentBranch}
+        branches={gitState.branches}
+        onSwitchBranch={switchBranch}
+        onCreateBranch={handleCreateBranch}
+        menuEnabled={currentStep.stage === 'gui'}
+      />
     </div>
   );
 }
 ```
+
+GUIステージでは、ステータスバー左端のブランチ名をクリックすると画面中央上部に VS Code 風のメニューがポップアップします。メニューからブランチを選択すると `git checkout` が裏側で実行され、その場でステップ判定が更新されます。`+ 新しいブランチの作成...` を選ぶとブランチ名の入力ダイアログが開き、`git checkout -b` が実行されます。
 
 ### 5.2 Terminal実装
 
@@ -807,47 +828,50 @@ export const Terminal: React.FC<TerminalProps> = ({ output, onCommand }) => {
 ### 5.3 SourceControlView実装
 
 ```typescript
-// src/components/SourceControl/SourceControlView.tsx
+// src/components/SourceControl/SourceControlView.tsx（抜粋）
 export const SourceControlView: React.FC<Props> = ({
   gitState,
   onStageFile,
   onCommit,
+  onPush,
+  readOnly = false,
 }) => {
   const [commitMessage, setCommitMessage] = useState('');
 
+  const canCommit = !readOnly && commitMessage.trim() && gitState.stagedFiles.length > 0;
+
   return (
-    <div className="h-full flex flex-col">
-      {/* コミットメッセージ入力 */}
-      <textarea
-        value={commitMessage}
-        onChange={(e) => setCommitMessage(e.target.value)}
-        placeholder="コミットメッセージ"
-      />
-      <Button
-        onClick={() => onCommit(commitMessage)}
-        disabled={!commitMessage.trim()}
-      >
-        ✓ コミット
-      </Button>
-
-      {/* 未ステージファイル */}
-      <div>
-        <h3>変更 ({gitState.unstagedFiles.length})</h3>
-        {gitState.unstagedFiles.map((file) => (
-          <div key={file.path}>
-            <span>{file.path}</span>
-            <button onClick={() => onStageFile(file.path)}>+</button>
+    <div className="h-full bg-vscode-sidebar flex flex-col">
+      {gitState.isRepository && (
+        <div className="p-3 border-b">
+          <textarea
+            value={commitMessage}
+            onChange={(e) => setCommitMessage(e.target.value)}
+            placeholder={readOnly ? 'コマンドステージでは閲覧のみです' : 'コミットメッセージ'}
+            disabled={readOnly}
+            className="w-full text-sm bg-vscode-bg border rounded"
+            rows={3}
+          />
+          <div className="mt-2 flex gap-2">
+            <Button onClick={() => canCommit && onCommit(commitMessage)} disabled={!canCommit}>
+              ✓ コミット
+            </Button>
+            {gitState.commits.length > 0 && (
+              <Button variant="secondary" disabled={readOnly} onClick={() => !readOnly && onPush()}>
+                ↑ プッシュ
+              </Button>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* ステージ済みファイル */}
-      <div>
-        <h3>ステージ済み ({gitState.stagedFiles.length})</h3>
-        {gitState.stagedFiles.map((file) => (
-          <div key={file.path}>{file.path}</div>
-        ))}
-      </div>
+      {/* ファイルリスト（省略） */}
+
+      {readOnly && (
+        <div className="p-3 text-xs text-vscode-text-muted border-t">
+          コマンドステージではソース管理ビューは閲覧のみです。
+        </div>
+      )}
     </div>
   );
 };
@@ -890,6 +914,8 @@ describe('TutorialService Integration', () => {
   });
 });
 ```
+
+ターミナルステージ中は `readOnly` が `true` になり、ボタンやテキストエリアは無効化されます。これにより「コマンドを学ぶステージではGUIのショートカットを使えない」体験を保ちつつ、状態は常に確認できます。
 
 ## 7. 実装時の注意点
 

@@ -426,6 +426,21 @@ describe('SourceControlView', () => {
     const commitButton = screen.getByRole('button', { name: /コミット/ });
     expect(commitButton).toBeDisabled();
   });
+
+  it('should render read-only indicators in command stage', () => {
+    render(
+      <SourceControlView
+        gitState={mockGitState}
+        onStageFile={vi.fn()}
+        onCommit={vi.fn()}
+        onPush={vi.fn()}
+        readOnly
+      />
+    );
+
+    expect(screen.getByPlaceholderText(/閲覧のみ/)).toBeDisabled();
+    expect(screen.getByText(/閲覧のみです/)).toBeInTheDocument();
+  });
 });
 ```
 
