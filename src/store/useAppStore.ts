@@ -40,7 +40,7 @@ interface AppState {
   push: () => Promise<void>;
   validateCurrentStep: () => Promise<void>;
   switchBranch: (branch: string) => Promise<void>;
-  createBranch: (branch: string) => Promise<void>;
+  createBranch: (branch: string) => Promise<boolean>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -376,18 +376,25 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { tutorialService } = get();
 
     if (!tutorialService || !branch.trim()) {
-      return;
+      return false;
+    }
+
+    const trimmed = branch.trim();
+    if (trimmed !== 'feature/gui-test') {
+      return false;
     }
 
     try {
-      await tutorialService.executeCommand(`git checkout -b ${branch.trim()}`, { skipValidation: true });
+      await tutorialService.executeCommand(`git checkout -b ${trimmed}`, { skipValidation: true });
       await get().refreshGitState();
 
       const currentStep = tutorialService.getCurrentStep();
       const tutorialState = tutorialService.getState();
       set({ currentStep, tutorialState });
+      return true;
     } catch (error) {
       console.error('Error creating branch:', error);
+      return false;
     }
   },
 }));

@@ -1,65 +1,127 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '../Common/Button';
 
 interface StatusBarProps {
   currentBranch: string;
   branches: string[];
-  onSwitchBranch: (branch: string) => void;
-  onCreateBranch: () => void;
+  onSwitchBranch: (branch: string) => Promise<void>;
+  onCreateBranch: (branch: string) => Promise<boolean>;
   menuEnabled: boolean;
 }
 
 const BranchMenu: React.FC<{
   currentBranch: string;
   branches: string[];
-  onSelectBranch: (branch: string) => void;
-  onCreateBranch: () => void;
+  onSelectBranch: (branch: string) => Promise<void>;
+  onCreateBranch: (branch: string) => Promise<boolean>;
   onClose: () => void;
 }> = ({ currentBranch, branches, onSelectBranch, onCreateBranch, onClose }) => {
   const remoteBranches = useMemo(() => {
     return Array.from(new Set(branches.map((branch) => `origin/${branch}`)));
   }, [branches]);
 
+  const [showCreateInput, setShowCreateInput] = useState(false);
+  const [newBranchName, setNewBranchName] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showCreateInput) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [showCreateInput]);
+
+  const handleCreate = async () => {
+    if (isProcessing) return;
+    const trimmed = newBranchName.trim();
+    if (!trimmed) {
+      setError('ブランチ名を入力してください');
+      return;
+    }
+    setIsProcessing(true);
+    const success = await onCreateBranch(trimmed);
+    setIsProcessing(false);
+    if (success) {
+      setShowCreateInput(false);
+      setNewBranchName('');
+      setError(null);
+      onClose();
+    } else {
+      setError('指定されたブランチ名ではありません（feature/gui-test）');
+    }
+  };
+
   return createPortal(
-    <div
-      className="fixed inset-0 z-30 flex items-start justify-center"
-      onClick={onClose}
-    >
-      <div
-        className="mt-14 bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="p-3 border-b border-vscode-border text-sm font-semibold text-vscode-text">
-          ブランチの切り替え
-        </div>
-        <div className="max-h-80 overflow-y-auto text-sm">
-          <button
-            type="button"
-            onClick={() => {
-              onClose();
-              onCreateBranch();
-            }}
-            className="w-full text-left px-4 py-2 hover:bg-vscode-hover text-vscode-accent"
-          >
-            + 新しいブランチの作成...
-          </button>
-          <div className="mx-4 border-t border-vscode-border my-2" />
-          <div className="px-4 py-1 text-xs font-semibold text-vscode-text-muted">
-            ローカルブランチ
+    <div className="fixed inset-0 z-30" onClick={onClose}>
+      <div className="w-full flex justify-center" style={{ paddingTop: '3.25rem' }}>
+        <div
+          className="bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="p-3 border-b border-vscode-border text-sm font-semibold text-vscode-text">
+            ブランチの切り替え
           </div>
-          {branches.map((branch) => (
-            <button
-              key={branch}
-              type="button"
-              onClick={() => {
-                onSelectBranch(branch);
-                onClose();
-              }}
-              className={`w-full text-left px-4 py-2 hover:bg-vscode-hover ${
-                branch === currentBranch ? 'font-semibold text-vscode-text' : 'text-vscode-text-secondary'
-              }`}
-            >
+          <div className="max-h-80 overflow-y-auto text-sm">
+            {!showCreateInput ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreateInput(true);
+                  setError(null);
+                }}
+                className="w-full text-left px-4 py-2 hover:bg-vscode-hover text-vscode-accent"
+              >
+                + 新しいブランチの作成...
+              </button>
+            ) : (
+              <div className="px-4 py-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={newBranchName}
+                  placeholder="feature/gui-test"
+                  onChange={(e) => {
+                    setNewBranchName(e.target.value);
+                    setError(null);
+                  }}
+                  className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded focus:border-vscode-input-focus outline-none"
+                />
+                {error && <p className="mt-1 text-xs text-vscode-warning">{error}</p>}
+                <div className="flex justify-end gap-2 mt-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowCreateInput(false);
+                      setNewBranchName('');
+                      setError(null);
+                    }}
+                  >
+                    キャンセル
+                  </Button>
+                  <Button onClick={handleCreate} disabled={isProcessing}>
+                    作成
+                  </Button>
+                </div>
+              </div>
+            )}
+            <div className="mx-4 border-t border-vscode-border my-2" />
+            <div className="px-4 py-1 text-xs font-semibold text-vscode-text-muted">
+              ローカルブランチ
+            </div>
+            {branches.map((branch) => (
+              <button
+                key={branch}
+                type="button"
+                onClick={async () => {
+                  await onSelectBranch(branch);
+                  onClose();
+                }}
+                className={`w-full text-left px-4 py-2 hover:bg-vscode-hover ${
+                  branch === currentBranch ? 'font-semibold text-vscode-text' : 'text-vscode-text-secondary'
+                }`}
+              >
               {branch}
             </button>
           ))}
@@ -73,10 +135,11 @@ const BranchMenu: React.FC<{
             </div>
           ))}
         </div>
-        <div className="flex justify-end gap-2 px-3 py-2 border-t border-vscode-border">
-          <Button variant="secondary" onClick={onClose}>
-            閉じる
-          </Button>
+          <div className="flex justify-end gap-2 px-3 py-2 border-t border-vscode-border">
+            <Button variant="secondary" onClick={onClose}>
+              閉じる
+            </Button>
+          </div>
         </div>
       </div>
     </div>,
@@ -96,10 +159,6 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   const handleToggleMenu = () => {
     if (!menuEnabled || branches.length === 0) return;
     setIsMenuOpen((open) => !open);
-  };
-
-  const handleCreateBranch = () => {
-    onCreateBranch();
   };
 
   return (
@@ -128,8 +187,10 @@ export const StatusBar: React.FC<StatusBarProps> = ({
         <BranchMenu
           currentBranch={currentBranch}
           branches={branches}
-          onSelectBranch={onSwitchBranch}
-          onCreateBranch={handleCreateBranch}
+          onSelectBranch={async (branch) => {
+            await onSwitchBranch(branch);
+          }}
+          onCreateBranch={onCreateBranch}
           onClose={() => setIsMenuOpen(false)}
         />
       )}

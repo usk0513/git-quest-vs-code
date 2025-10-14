@@ -58,17 +58,11 @@ function App() {
       ? 'コマンドステージ（Gitコマンド操作を学習中）'
       : 'GUIステージ（VS Code操作を学習中）';
 
-  const handleCreateBranch = () => {
+  const handleCreateBranch = async (branch: string): Promise<boolean> => {
     if (currentStep.stage !== 'gui') {
-      return;
+      return false;
     }
-
-    const suggestedName = currentStep.id === 21 ? 'feature/gui-test' : 'feature/new-branch';
-    const input = window.prompt('新しいブランチ名を入力してください', suggestedName);
-    if (!input) {
-      return;
-    }
-    createBranch(input);
+    return await createBranch(branch);
   };
 
   return (

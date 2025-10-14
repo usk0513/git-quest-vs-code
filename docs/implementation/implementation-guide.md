@@ -736,11 +736,9 @@ function App() {
       ? 'コマンドステージ（Gitコマンド操作を学習中）'
       : 'GUIステージ（VS Code操作を学習中）';
 
-  const handleCreateBranch = () => {
-    if (currentStep.stage !== 'gui') return;
-    const suggested = currentStep.id === 21 ? 'feature/gui-test' : 'feature/new-branch';
-    const name = window.prompt('新しいブランチ名を入力してください', suggested);
-    if (name) createBranch(name.trim());
+  const handleCreateBranch = async (branch: string) => {
+    if (currentStep.stage !== 'gui') return false;
+    return await createBranch(branch);
   };
 
   return (
@@ -785,7 +783,7 @@ function App() {
 }
 ```
 
-GUIステージでは、ステータスバー左端のブランチ名をクリックすると画面中央上部に VS Code 風のメニューがポップアップします。メニューからブランチを選択すると `git checkout` が裏側で実行され、その場でステップ判定が更新されます。`+ 新しいブランチの作成...` を選ぶとブランチ名の入力ダイアログが開き、`git checkout -b` が実行されます。
+GUIステージでは、ステータスバー左端のブランチ名をクリックすると画面中央上部に VS Code 風のメニューがポップアップします。メニューからブランチを選択すると `git checkout` が裏側で実行され、その場でステップ判定が更新されます。`+ 新しいブランチの作成...` をクリックすると同じメニュー内にテキストボックスが表示され、`feature/gui-test` を入力して「作成」を押すと `git checkout -b` が実行されます（それ以外の名前はバリデーションで弾かれます）。
 
 ### 5.2 Terminal実装
 
