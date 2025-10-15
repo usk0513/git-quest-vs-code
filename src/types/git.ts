@@ -17,6 +17,7 @@ export interface GitState {
   isRepository: boolean;
   currentBranch: string;
   branches: string[];
+  remoteBranches: string[];
   stagedFiles: GitFile[];
   unstagedFiles: GitFile[];
   commits: GitCommit[];

@@ -119,6 +119,7 @@ function App() {
       <StatusBar
         currentBranch={gitState.currentBranch}
         branches={gitState.branches}
+        remoteBranches={gitState.remoteBranches}
         onSwitchBranch={switchBranch}
         onCreateBranch={handleCreateBranch}
         menuEnabled={currentStep.stage === 'gui'}

@@ -50,6 +50,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     isRepository: false,
     currentBranch: '',
     branches: [],
+    remoteBranches: [],
     stagedFiles: [],
     unstagedFiles: [],
     commits: [],

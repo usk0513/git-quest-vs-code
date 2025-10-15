@@ -5,6 +5,7 @@ import { Button } from '../Common/Button';
 interface StatusBarProps {
   currentBranch: string;
   branches: string[];
+  remoteBranches: string[];
   onSwitchBranch: (branch: string) => Promise<void>;
   onCreateBranch: (branch: string) => Promise<boolean>;
   menuEnabled: boolean;
@@ -13,13 +14,18 @@ interface StatusBarProps {
 const BranchMenu: React.FC<{
   currentBranch: string;
   branches: string[];
+  remoteBranches: string[];
   onSelectBranch: (branch: string) => Promise<void>;
   onCreateBranch: (branch: string) => Promise<boolean>;
   onClose: () => void;
-}> = ({ currentBranch, branches, onSelectBranch, onCreateBranch, onClose }) => {
-  const remoteBranches = useMemo(() => {
-    return Array.from(new Set(branches.map((branch) => `origin/${branch}`)));
-  }, [branches]);
+}> = ({
+  currentBranch,
+  branches,
+  remoteBranches,
+  onSelectBranch,
+  onCreateBranch,
+  onClose,
+}) => {
 
   const [showCreateInput, setShowCreateInput] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
@@ -150,6 +156,7 @@ const BranchMenu: React.FC<{
 export const StatusBar: React.FC<StatusBarProps> = ({
   currentBranch,
   branches,
+  remoteBranches,
   onSwitchBranch,
   onCreateBranch,
   menuEnabled,
@@ -187,6 +194,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
         <BranchMenu
           currentBranch={currentBranch}
           branches={branches}
+          remoteBranches={remoteBranches}
           onSelectBranch={async (branch) => {
             await onSwitchBranch(branch);
           }}

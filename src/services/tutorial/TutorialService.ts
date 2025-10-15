@@ -515,7 +515,15 @@ export class TutorialService {
   }
 
   async getGitState() {
-    return await this.git.getGitState(WORKSPACE_DIR);
+    const gitState = await this.git.getGitState(WORKSPACE_DIR);
+    const remoteBranches = new Set<string>(['origin/main']);
+    this.pushedBranches.forEach((branch) => {
+      remoteBranches.add(`origin/${branch}`);
+    });
+    return {
+      ...gitState,
+      remoteBranches: Array.from(remoteBranches),
+    };
   }
 
   async editFile(filepath: string, content: string): Promise<void> {
