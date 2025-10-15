@@ -542,7 +542,22 @@ export class TutorialService {
       if (!exists) {
         return [];
       }
-      return await this.fs.readdir(WORKSPACE_DIR);
+      const entries = await this.fs.readdir(WORKSPACE_DIR);
+      const files: string[] = [];
+
+      for (const entry of entries) {
+        const fullPath = `${WORKSPACE_DIR}/${entry}`;
+        try {
+          const stat = await this.fs.stat(fullPath);
+          if (!stat.isDirectory()) {
+            files.push(entry);
+          }
+        } catch (error) {
+          console.warn(`Failed to stat ${fullPath}:`, error);
+        }
+      }
+
+      return files.sort();
     } catch {
       return [];
     }
