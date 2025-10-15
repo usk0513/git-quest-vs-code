@@ -455,6 +455,9 @@ VS Codeと同じ操作でブランチを作成できます！
     validationRules: [
       { type: 'file-content', target: 'greeting.txt', expectedValue: 'Hello, Git Quest!' },
     ],
+    requiresValidationButton: true,
+    validationButtonLabel: '編集内容をチェック',
+    autoAdvance: false,
   },
   // Step 4-1: git add (GUI)
   {
