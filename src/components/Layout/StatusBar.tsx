@@ -8,6 +8,7 @@ interface StatusBarProps {
   remoteBranches: string[];
   onSwitchBranch: (branch: string) => Promise<void>;
   onCreateBranch: (branch: string) => Promise<boolean>;
+  canCreateBranch: boolean;
   menuEnabled: boolean;
 }
 
@@ -18,6 +19,7 @@ const BranchMenu: React.FC<{
   onSelectBranch: (branch: string) => Promise<void>;
   onCreateBranch: (branch: string) => Promise<boolean>;
   onClose: () => void;
+  canCreateBranch: boolean;
 }> = ({
   currentBranch,
   branches,
@@ -25,6 +27,7 @@ const BranchMenu: React.FC<{
   onSelectBranch,
   onCreateBranch,
   onClose,
+  canCreateBranch,
 }) => {
 
   const [showCreateInput, setShowCreateInput] = useState(false);
@@ -77,7 +80,12 @@ const BranchMenu: React.FC<{
                   setShowCreateInput(true);
                   setError(null);
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-vscode-hover text-vscode-accent"
+                disabled={!canCreateBranch}
+                className={`w-full text-left px-4 py-2 ${
+                  canCreateBranch
+                    ? 'hover:bg-vscode-hover text-vscode-accent'
+                    : 'text-vscode-text-muted cursor-not-allowed opacity-60'
+                }`}
               >
                 + 新しいブランチの作成...
               </button>
@@ -159,6 +167,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   remoteBranches,
   onSwitchBranch,
   onCreateBranch,
+  canCreateBranch,
   menuEnabled,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -199,6 +208,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
             await onSwitchBranch(branch);
           }}
           onCreateBranch={onCreateBranch}
+          canCreateBranch={canCreateBranch}
           onClose={() => setIsMenuOpen(false)}
         />
       )}

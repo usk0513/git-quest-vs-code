@@ -426,6 +426,9 @@ VS Codeと同じ操作でブランチを作成できます！
       { type: 'branch-created', target: 'feature/gui-test' },
       { type: 'branch-switched', target: 'feature/gui-test' },
     ],
+    requiresValidationButton: true,
+    validationButtonLabel: 'ブランチを作成したことを確認',
+    autoAdvance: false,
   },
   // Step 3-1: Edit file (GUI)
   {

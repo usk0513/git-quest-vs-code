@@ -122,6 +122,7 @@ function App() {
         remoteBranches={gitState.remoteBranches}
         onSwitchBranch={switchBranch}
         onCreateBranch={handleCreateBranch}
+        canCreateBranch={currentStep.stage === 'gui' && gitState.currentBranch === 'main'}
         menuEnabled={currentStep.stage === 'gui'}
       />
     </div>
