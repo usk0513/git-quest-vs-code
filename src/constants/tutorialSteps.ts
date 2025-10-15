@@ -428,7 +428,7 @@ VS Codeと同じ操作でブランチを作成できます！
     ],
     requiresValidationButton: true,
     validationButtonLabel: 'ブランチを作成したことを確認',
-    autoAdvance: false,
+    autoAdvance: true,
   },
   // Step 3-1: Edit file (GUI)
   {
@@ -460,7 +460,7 @@ VS Codeと同じ操作でブランチを作成できます！
     ],
     requiresValidationButton: true,
     validationButtonLabel: '編集内容をチェック',
-    autoAdvance: false,
+    autoAdvance: true,
   },
   // Step 4-1: git add (GUI)
   {
