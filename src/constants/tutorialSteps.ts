@@ -486,6 +486,7 @@ VS Codeと同じ操作でブランチを作成できます！
     validationRules: [
       { type: 'file-staged', target: 'greeting.txt' },
     ],
+    autoAdvance: true,
   },
   // Step 5-1: git commit (GUI)
   {
