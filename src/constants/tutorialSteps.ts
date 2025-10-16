@@ -516,7 +516,7 @@ VS Codeと同じ操作でブランチを作成できます！
     ],
     successMessage: 'GUIでコミットできました！',
     validationRules: [
-      { type: 'commit-made', expectedValue: 3 },
+      { type: 'commit-made', expectedValue: 2 },
     ],
   },
   // Step 6-1: git push (GUI)
