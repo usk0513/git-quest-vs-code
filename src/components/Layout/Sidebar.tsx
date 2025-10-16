@@ -16,6 +16,7 @@ interface SidebarProps {
   onCommit: (message: string) => void;
   onPush: () => void;
   sourceControlReadOnly?: boolean;
+  sourceControlReadOnlyMessage?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -29,6 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCommit,
   onPush,
   sourceControlReadOnly = false,
+  sourceControlReadOnlyMessage,
 }) => {
   return (
     <div className="h-full flex">
@@ -63,6 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onCommit={onCommit}
             onPush={onPush}
             readOnly={sourceControlReadOnly}
+            readOnlyMessage={sourceControlReadOnlyMessage}
           />
         ) : (
           <ExplorerView

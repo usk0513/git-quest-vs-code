@@ -8,6 +8,7 @@ interface SourceControlViewProps {
   onCommit: (message: string) => void;
   onPush: () => void;
   readOnly?: boolean;
+  readOnlyMessage?: string;
 }
 
 export const SourceControlView: React.FC<SourceControlViewProps> = ({
@@ -16,6 +17,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
   onCommit,
   onPush,
   readOnly = false,
+  readOnlyMessage,
 }) => {
   const [commitMessage, setCommitMessage] = useState('');
 
@@ -183,7 +185,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
 
         {readOnly && gitState.isRepository && (
           <div className="p-3 text-xs text-vscode-text-muted border-t border-vscode-border">
-            ※ このソース管理ビューはコマンドステージでは閲覧のみ可能です。
+            {readOnlyMessage ?? '※ このソース管理ビューはコマンドステージでは閲覧のみ可能です。'}
           </div>
         )}
       </div>

@@ -273,13 +273,24 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // Stage file (GUI action)
   stageFile: async (filepath: string) => {
-    const { tutorialService } = get();
+    const { tutorialService, gitState } = get();
 
     if (!tutorialService) {
       return;
     }
 
     try {
+      const state = tutorialService.getState();
+      if (state.currentStage === 'gui' && gitState.currentBranch !== 'feature/gui-test') {
+        set({
+          terminalOutput: [
+            ...get().terminalOutput,
+            'Hint: GUIステージでは feature/gui-test ブランチで操作してください。',
+            '',
+          ],
+        });
+        return;
+      }
       // Execute git add command internally
       await tutorialService.executeCommand(`git add ${filepath}`, { skipValidation: true });
       await get().refreshGitState();
@@ -290,13 +301,24 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // Commit (GUI action)
   commit: async (message: string) => {
-    const { tutorialService } = get();
+    const { tutorialService, gitState } = get();
 
     if (!tutorialService) {
       return;
     }
 
     try {
+      const state = tutorialService.getState();
+      if (state.currentStage === 'gui' && gitState.currentBranch !== 'feature/gui-test') {
+        set({
+          terminalOutput: [
+            ...get().terminalOutput,
+            'Hint: GUIステージでは feature/gui-test ブランチで操作してください。',
+            '',
+          ],
+        });
+        return;
+      }
       await tutorialService.executeCommand(`git commit -m "${message}"`, { skipValidation: true });
       await get().refreshGitState();
     } catch (error) {
@@ -313,6 +335,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     try {
+      const state = tutorialService.getState();
+      if (state.currentStage === 'gui' && gitState.currentBranch !== 'feature/gui-test') {
+        set({
+          terminalOutput: [
+            ...get().terminalOutput,
+            'Hint: GUIステージでは feature/gui-test ブランチで操作してください。',
+            '',
+          ],
+        });
+        return;
+      }
       const branch = gitState.currentBranch;
       await tutorialService.executeCommand(`git push origin ${branch}`, { skipValidation: true });
       await get().refreshGitState();

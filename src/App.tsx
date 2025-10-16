@@ -65,6 +65,13 @@ function App() {
     return await createBranch(branch);
   };
 
+  const isCommandStage = currentStep.stage === 'terminal';
+  const requiresGuiBranch = currentStep.stage === 'gui' && gitState.currentBranch !== 'feature/gui-test';
+  const sourceControlReadOnly = isCommandStage || requiresGuiBranch;
+  const sourceControlReadOnlyMessage = isCommandStage
+    ? '※ このソース管理ビューはコマンドステージでは閲覧のみ可能です。'
+    : 'feature/gui-test ブランチに切り替えてから操作してください。';
+
   return (
     <div className="w-screen h-screen bg-vscode-bg flex flex-col overflow-hidden">
       {/* Header */}
@@ -81,12 +88,13 @@ function App() {
             files={files}
             currentFile={currentFile}
             onSelectFile={selectFile}
-            onStageFile={stageFile}
-            onCommit={commit}
-            onPush={push}
-            sourceControlReadOnly={currentStep.stage === 'terminal'}
-          />
-        </div>
+          onStageFile={stageFile}
+          onCommit={commit}
+          onPush={push}
+          sourceControlReadOnly={sourceControlReadOnly}
+          sourceControlReadOnlyMessage={sourceControlReadOnly ? sourceControlReadOnlyMessage : undefined}
+        />
+      </div>
 
         {/* Center: Editor + Terminal */}
         <div className="flex-1 flex flex-col">
