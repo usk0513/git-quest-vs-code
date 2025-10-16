@@ -120,6 +120,7 @@ export class GitService {
           isRepository: false,
           currentBranch: '',
           branches: [],
+          remoteBranches: [],
           stagedFiles: [],
           unstagedFiles: [],
           commits: [],
