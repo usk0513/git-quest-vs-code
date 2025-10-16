@@ -294,6 +294,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       // Execute git add command internally
       await tutorialService.executeCommand(`git add ${filepath}`);
       await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
     } catch (error) {
       console.error('Error staging file:', error);
     }
@@ -321,6 +324,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       await tutorialService.executeCommand(`git commit -m "${message}"`);
       await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
     } catch (error) {
       console.error('Error committing:', error);
     }
@@ -349,6 +355,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       const branch = gitState.currentBranch;
       await tutorialService.executeCommand(`git push origin ${branch}`);
       await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
     } catch (error) {
       console.error('Error pushing:', error);
     }
