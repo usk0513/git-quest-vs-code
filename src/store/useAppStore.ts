@@ -292,7 +292,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         return;
       }
       // Execute git add command internally
-      await tutorialService.executeCommand(`git add ${filepath}`);
+      await tutorialService.executeCommand(`git add ${filepath}`, { skipValidation: true });
       await get().refreshGitState();
       if (tutorialService.getState().currentStage === 'gui') {
         await get().validateCurrentStep();
@@ -322,7 +322,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         });
         return;
       }
-      await tutorialService.executeCommand(`git commit -m "${message}"`);
+      await tutorialService.executeCommand(`git commit -m "${message}"`, { skipValidation: true });
       await get().refreshGitState();
       if (tutorialService.getState().currentStage === 'gui') {
         await get().validateCurrentStep();
@@ -353,7 +353,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         return;
       }
       const branch = gitState.currentBranch;
-      await tutorialService.executeCommand(`git push origin ${branch}`);
+      await tutorialService.executeCommand(`git push origin ${branch}`, { skipValidation: true });
       await get().refreshGitState();
       if (tutorialService.getState().currentStage === 'gui') {
         await get().validateCurrentStep();
