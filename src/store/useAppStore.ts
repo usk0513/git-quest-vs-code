@@ -324,6 +324,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       await tutorialService.executeCommand(`git commit -m "${message}"`, { skipValidation: true });
       await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
     } catch (error) {
       console.error('Error committing:', error);
     }
@@ -352,6 +355,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       const branch = gitState.currentBranch;
       await tutorialService.executeCommand(`git push origin ${branch}`, { skipValidation: true });
       await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
     } catch (error) {
       console.error('Error pushing:', error);
     }
