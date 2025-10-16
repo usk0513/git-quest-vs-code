@@ -294,6 +294,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       // Execute git add command internally
       await tutorialService.executeCommand(`git add ${filepath}`, { skipValidation: true });
       await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
     } catch (error) {
       console.error('Error staging file:', error);
     }
