@@ -297,6 +297,10 @@ git add .
     stage: 'terminal',
     title: 'Step 5: 変更をコミット',
     description: 'ステージングした変更をコミットします',
+    illustration: {
+      src: 'https://i.gyazo.com/3bb0d6e18bef260e519e965ae6f1e794.png',
+      alt: 'コミットメッセージ入力とコミット操作のイメージ図'
+    },
     detailedInstructions: `
 ## git commit
 
