@@ -232,6 +232,10 @@ Hello, Git!
     stage: 'terminal',
     title: 'Step 4: 変更をステージング',
     description: '変更したファイルをステージングエリアに追加します',
+    illustration: {
+      src: 'https://i.gyazo.com/8d09e2b90513c0b1c880269cb1b749ce.png',
+      alt: 'ソース管理ビューで変更をステージングしているイメージ図'
+    },
     detailedInstructions: `
 ## git add
 
