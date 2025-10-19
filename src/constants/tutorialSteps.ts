@@ -358,6 +358,10 @@ git commit -m "Add greeting message"
     stage: 'terminal',
     title: 'Step 6: リモートにプッシュ',
     description: 'ローカルの変更をリモートリポジトリにプッシュします',
+    illustration: {
+      src: 'https://i.gyazo.com/592d528d48c1ab20ba49835f7335096f.png',
+      alt: 'リモートへプッシュする操作を示す図'
+    },
     detailedInstructions: `
 ## git push
 
