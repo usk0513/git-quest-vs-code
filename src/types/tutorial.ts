@@ -8,6 +8,10 @@ export interface StepConfig {
   title: string;
   description: string;
   detailedInstructions: string;
+  illustration?: {
+    src: string;
+    alt: string;
+  };
   allowedCommands: GitCommand[];
   allowedGuiActions?: GuiAction[];
   allowBranchCreation?: boolean;

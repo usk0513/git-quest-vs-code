@@ -19,6 +19,16 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
           <p className="text-sm text-vscode-text-secondary">{step.description}</p>
         </div>
 
+        {step.illustration && (
+          <div className="mb-6">
+            <img
+              src={step.illustration.src}
+              alt={step.illustration.alt}
+              className="w-full rounded border border-vscode-border"
+            />
+          </div>
+        )}
+
         <div className="mb-6 p-4 bg-vscode-sidebar rounded border border-vscode-border">
           <h3 className="text-sm font-medium text-vscode-text mb-2">📘 説明</h3>
           <div className="text-sm text-vscode-text whitespace-pre-wrap">

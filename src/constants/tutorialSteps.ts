@@ -7,6 +7,10 @@ export const TUTORIAL_STEPS: StepConfig[] = [
     stage: 'terminal',
     title: 'リモートリポジトリの確認',
     description: 'リモートリポジトリが存在する状態です',
+    illustration: {
+      src: 'https://i.gyazo.com/423a788d51d01e75474858d653ab6f6a.png',
+      alt: 'ローカルは空でリモートリポジトリにのみファイルが存在している状態を示す図',
+    },
     detailedInstructions: `
 Git Questへようこそ！
 
