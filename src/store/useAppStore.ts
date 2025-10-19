@@ -397,7 +397,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   switchBranch: async (branch: string) => {
-    const { tutorialService } = get();
+    const { tutorialService, currentFile } = get();
 
     if (!tutorialService) {
       return;
@@ -406,6 +406,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     try {
       await tutorialService.executeCommand(`git checkout ${branch}`, { skipValidation: true });
       await get().refreshGitState();
+
+      if (currentFile) {
+        try {
+          const content = await tutorialService.readFile(currentFile);
+          set({ fileContent: content });
+        } catch (error) {
+          console.error('Error reading file after branch switch:', error);
+          set({ fileContent: '' });
+        }
+      }
 
       const currentStep = tutorialService.getCurrentStep();
       const tutorialState = tutorialService.getState();
