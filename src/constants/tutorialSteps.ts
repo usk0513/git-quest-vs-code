@@ -458,6 +458,10 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     stage: 'gui',
     title: 'Step 2: 新しいブランチを作成（GUI）',
     description: 'GUIを使ってブランチを作成します',
+    illustration: {
+      src: 'https://i.gyazo.com/558594a0afa7dc02c7a2e1dc57928ed4.png',
+      alt: 'GUIから新しいブランチを作成する様子を示す図'
+    },
     detailedInstructions: `
 ## ブランチの作成（GUI操作）
 
