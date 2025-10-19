@@ -438,7 +438,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 1. 画面左下のブランチ名（現在は feature/add-greeting）をクリック
 2. 画面中央に表示されるブランチメニューから main を選択
 
-切り替え後、ステータスバーに main と表示されることを確認してください。
+選択するとメインブランチに切り替わります。
     `,
     allowedCommands: ['status', 'log', 'branch'],
     allowedGuiActions: ['switch-branch'],
@@ -452,9 +452,32 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     ],
     allowBranchCreation: false,
   },
-  // Step 2-1: Create branch (GUI)
   {
     id: 21,
+    stage: 'gui',
+    title: 'Step 1: メインブランチを確認（GUI）',
+    description: 'ステータスバーが main になっていることを確認します',
+    detailedInstructions: `
+## 切り替え結果の確認
+
+ステータスバー左下のブランチ名が main になっているか確認しましょう。
+必要に応じて \`git branch\` を実行して、現在のブランチが main であることを確かめても構いません。
+
+確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
+    `,
+    allowedCommands: ['status', 'log', 'branch'],
+    hints: [
+      'ステータスバーに main と表示されているか確認してください',
+      'git branch を実行すると現在のブランチを確認できます',
+    ],
+    successMessage: 'main ブランチにいることを確認できました！',
+    validationRules: [],
+    allowBranchCreation: false,
+    autoAdvance: false,
+  },
+  // Step 2-1: Create branch (GUI)
+  {
+    id: 22,
     stage: 'gui',
     title: 'Step 2: 新しいブランチを作成（GUI）',
     description: 'GUIを使ってブランチを作成します',
