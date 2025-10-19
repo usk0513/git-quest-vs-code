@@ -73,6 +73,10 @@ git clone /remote-repo
     stage: 'terminal',
     title: 'Step 1: クローン結果を確認',
     description: 'クローンしたファイルをUIで確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/10585663cc21ef9b604ee203bd897755.png',
+      alt: 'エクスプローラーで README.md と greeting.txt を確認するイメージ図'
+    },
     detailedInstructions: `
 ## クローン結果を確認
 
