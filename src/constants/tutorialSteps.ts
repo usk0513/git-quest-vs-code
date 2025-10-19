@@ -330,6 +330,10 @@ git commit -m "Add greeting message"
     stage: 'terminal',
     title: 'Step 5: コミット履歴を確認',
     description: 'コミットが反映されたことを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/e70ffc30fb288a2d299293c56a79444d.png',
+      alt: 'コミット履歴を確認する画面の図'
+    },
     detailedInstructions: `
 ## コミット履歴を確認
 
