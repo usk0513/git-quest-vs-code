@@ -523,11 +523,14 @@ VS Codeと同じ操作でブランチを作成できます！
     stage: 'gui',
     title: 'Step 2: ブランチを確認（GUI）',
     description: 'ステータスバーが feature/gui-test になっていることを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/77cbd53ad1ff9db6ebd17568f8a7b27f.png',
+      alt: 'ステータスバーで feature/gui-test ブランチが選択されていることを確認する図',
+    },
     detailedInstructions: `
 ## 作成したブランチの確認
 
 ステータスバー左下のブランチ名が feature/gui-test になっているか確認しましょう。
-必要に応じて \`git branch\` を実行して、現在のブランチが feature/gui-test であることを確かめても構いません。
 
 確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
     `,
