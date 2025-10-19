@@ -172,6 +172,10 @@ git checkout feature/add-greeting
     stage: 'terminal',
     title: 'Step 3: ファイルを編集',
     description: 'greeting.txt に内容を追加します',
+    illustration: {
+      src: 'https://i.gyazo.com/36c2ba65e5232e3e8db53316c834449b.png',
+      alt: 'エディタで greeting.txt を編集している図'
+    },
     detailedInstructions: `
 ## ファイルの編集
 
