@@ -75,7 +75,7 @@ function App() {
   return (
     <div className="w-screen h-screen bg-vscode-bg flex flex-col overflow-hidden">
       {/* Header */}
-      <Header onReset={reset} modeLabel={modeLabel} />
+      <Header modeLabel={modeLabel} />
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
