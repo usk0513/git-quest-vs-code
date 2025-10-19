@@ -390,6 +390,10 @@ git push origin feature/add-greeting
     stage: 'terminal',
     title: 'Step 6: プッシュ結果を確認',
     description: 'リモートへ反映されたことを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/12f77f174b9dc3307e29645237799dd7.png',
+      alt: 'リモートへの反映を確認している画面の図'
+    },
     detailedInstructions: `
 ## プッシュ結果を確認
 
