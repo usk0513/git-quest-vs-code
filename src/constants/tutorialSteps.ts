@@ -204,6 +204,10 @@ Hello, Git!
     stage: 'terminal',
     title: 'Step 3: 変更内容を確認',
     description: 'ソース管理に編集内容が反映されたかを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/1db77c4292475662cc2bcfe35065bd36.png',
+      alt: 'git status で変更内容を確認するイメージ図'
+    },
     detailedInstructions: `
 ## 変更内容を確認
 
