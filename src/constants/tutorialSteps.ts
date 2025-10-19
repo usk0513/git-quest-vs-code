@@ -580,12 +580,44 @@ VS Codeと同じ操作でブランチを作成できます！
     validationButtonLabel: '編集内容をチェック',
     autoAdvance: true,
   },
+  // Step 3-2: Confirm file changes (GUI)
+  {
+    id: 32,
+    stage: 'gui',
+    title: 'Step 3: 変更を確認（GUI）',
+    description: 'ソース管理ビューで greeting.txt の変更を確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/b62d4ffa837efffddca5c0a1b3b82f33.png',
+      alt: 'ソース管理ビューで greeting.txt の変更を確認する図',
+    },
+    detailedInstructions: `
+## 変更内容の確認
+
+ソース管理ビューの「変更」セクションに greeting.txt が表示されているか確認しましょう。
+ステータスバー左側のソース管理アイコンをクリックすると、変更の一覧が表示されます。
+
+変更が表示されていることを確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
+    `,
+    allowedCommands: ['status', 'log', 'branch'],
+    hints: [
+      'サイドバーのソース管理アイコンをクリックして変更を確認してください',
+      'greeting.txt が「変更」セクションに表示されているか確認してください',
+    ],
+    successMessage: '変更がソース管理ビューに表示されていることを確認できました！',
+    validationRules: [],
+    allowBranchCreation: false,
+    autoAdvance: false,
+  },
   // Step 4-1: git add (GUI)
   {
     id: 41,
     stage: 'gui',
     title: 'Step 4: 変更をステージング（GUI）',
     description: 'GUIでファイルをステージングします',
+    illustration: {
+      src: 'https://i.gyazo.com/7e11c954259326ea4a1f470900ee3eaf.png',
+      alt: 'ソース管理ビューで greeting.txt をステージングする図',
+    },
     detailedInstructions: `
 ## ステージング（GUI操作）
 
@@ -615,6 +647,10 @@ VS Codeと同じ操作でブランチを作成できます！
     stage: 'gui',
     title: 'Step 5: 変更をコミット（GUI）',
     description: 'GUIでコミットします',
+    illustration: {
+      src: 'https://i.gyazo.com/9c0ab52cd7593642573104a365442d90.png',
+      alt: 'ソース管理ビューでコミットメッセージを入力してコミットする図',
+    },
     detailedInstructions: `
 ## コミット（GUI操作）
 
@@ -643,6 +679,10 @@ VS Codeと同じ操作でブランチを作成できます！
     stage: 'gui',
     title: 'Step 6: リモートにプッシュ（GUI）',
     description: 'GUIでプッシュします',
+    illustration: {
+      src: 'https://i.gyazo.com/3f616549be1832c38aa16bff9a9255be.png',
+      alt: 'ソース管理ビューでプッシュボタンを押す図',
+    },
     detailedInstructions: `
 ## プッシュ（GUI操作）
 
