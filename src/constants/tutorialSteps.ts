@@ -704,4 +704,32 @@ VS Codeと同じ操作でブランチを作成できます！
       { type: 'pushed' },
     ],
   },
+  // Step 6-2: Confirm push (GUI)
+  {
+    id: 62,
+    stage: 'gui',
+    title: 'Step 6: プッシュ結果を確認（GUI）',
+    description: 'プッシュが完了し、リモートに反映されたことを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/31884f7ca43cfb53d6040b20364375c4.png',
+      alt: 'プッシュ完了後の通知とステータスを確認する図',
+    },
+    detailedInstructions: `
+## プッシュ完了の確認
+
+ステータスバー左下のブランチ名をクリックしてブランチ一覧を開きます。
+一覧に \`origin/feature/gui-test\` が表示され、選択できることを確認しましょう。
+
+確認が終わったら、ページをリロードすると最初のステップから再挑戦できます。
+    `,
+    allowedCommands: ['status', 'log', 'branch'],
+    hints: [
+      'ステータスバー左下のブランチ名をクリックしてください',
+      '一覧に \`origin/feature/gui-test\` が表示されているか確認してください',
+    ],
+    successMessage: 'リモートへの反映を確認できました！お疲れさまでした！',
+    validationRules: [],
+    allowBranchCreation: false,
+    autoAdvance: false,
+  },
 ];
