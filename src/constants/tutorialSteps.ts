@@ -33,6 +33,10 @@ Git Questへようこそ！
     stage: 'terminal',
     title: 'Step 1: リポジトリをクローン',
     description: 'リモートリポジトリをローカルにクローンします',
+    illustration: {
+      src: 'https://i.gyazo.com/5335a6c080c4ff2de437cd4331bec189.png',
+      alt: 'git clone によってリモートの内容をローカルに複製するイメージ図'
+    },
     detailedInstructions: `
 ## git clone
 
