@@ -22,7 +22,6 @@ function App() {
     editFile,
     selectFile,
     nextStep,
-    reset,
     setSidebarView,
     stageFile,
     commit,
