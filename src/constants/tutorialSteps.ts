@@ -427,8 +427,8 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     title: 'Step 1: メインブランチに切り替え（GUI）',
     description: 'GUIを使ってメインブランチに戻ります',
     illustration: {
-      src: 'https://i.gyazo.com/558594a0afa7dc02c7a2e1dc57928ed4.png',
-      alt: 'ステータスバーから main を選択する図'
+      src: 'https://i.gyazo.com/ba5030838bfd99f76144c4d42aaa7647.png',
+      alt: 'ステータスバーから main ブランチを選択する図',
     },
     detailedInstructions: `
 ## ブランチの切り替え（GUI操作）
@@ -457,6 +457,10 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     stage: 'gui',
     title: 'Step 1: メインブランチを確認（GUI）',
     description: 'ステータスバーが main になっていることを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/558594a0afa7dc02c7a2e1dc57928ed4.png',
+      alt: 'ステータスバーに main と表示されていることを確認する図',
+    },
     detailedInstructions: `
 ## 切り替え結果の確認
 
@@ -468,7 +472,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     allowedCommands: ['status', 'log', 'branch'],
     hints: [
       'ステータスバーに main と表示されているか確認してください',
-      'git branch を実行すると現在のブランチを確認できます',
+      'greeting.txt が空の状態に戻っているか確認してください',
     ],
     successMessage: 'main ブランチにいることを確認できました！',
     validationRules: [],
@@ -482,7 +486,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     title: 'Step 2: 新しいブランチを作成（GUI）',
     description: 'GUIを使ってブランチを作成します',
     illustration: {
-      src: 'https://i.gyazo.com/558594a0afa7dc02c7a2e1dc57928ed4.png',
+      src: 'https://i.gyazo.com/ba5030838bfd99f76144c4d42aaa7647.png',
       alt: 'GUIから新しいブランチを作成する様子を示す図'
     },
     detailedInstructions: `
