@@ -422,6 +422,10 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     stage: 'gui',
     title: 'Step 1: メインブランチに切り替え（GUI）',
     description: 'GUIを使ってメインブランチに戻ります',
+    illustration: {
+      src: 'https://i.gyazo.com/558594a0afa7dc02c7a2e1dc57928ed4.png',
+      alt: 'ステータスバーから main を選択する図'
+    },
     detailedInstructions: `
 ## ブランチの切り替え（GUI操作）
 
