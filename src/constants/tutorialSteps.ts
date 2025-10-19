@@ -269,6 +269,10 @@ git add .
     stage: 'terminal',
     title: 'Step 4: ステージ状態を確認',
     description: 'ステージングされたファイルを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/ffca3315e83415dfec1fe94e15c6c37d.png',
+      alt: 'ステージ済みのファイルを確認している画面の図'
+    },
     detailedInstructions: `
 ## ステージ状態を確認
 
