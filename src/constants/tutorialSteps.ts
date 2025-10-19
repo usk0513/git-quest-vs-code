@@ -550,6 +550,10 @@ VS Codeと同じ操作でブランチを作成できます！
     stage: 'gui',
     title: 'Step 3: ファイルを編集（GUI）',
     description: 'エディタでファイルを編集します',
+    illustration: {
+      src: 'https://i.gyazo.com/a179c96600b938e051f484e3ab6c784b.png',
+      alt: 'エディタで greeting.txt を編集している様子を示す図',
+    },
     detailedInstructions: `
 ## ファイルの編集（GUI操作）
 
