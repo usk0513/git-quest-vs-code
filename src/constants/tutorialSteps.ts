@@ -143,6 +143,10 @@ git checkout feature/add-greeting
     stage: 'terminal',
     title: 'Step 2: ブランチの状態を確認',
     description: 'ブランチが切り替わったことを確認します',
+    illustration: {
+      src: 'https://i.gyazo.com/20b07aff6619a7b921f136c5ed6cd2be.png',
+      alt: 'ブランチ状態を確認している画面の図'
+    },
     detailedInstructions: `
 ## ブランチの状態を確認
 
