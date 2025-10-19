@@ -517,6 +517,30 @@ VS Codeと同じ操作でブランチを作成できます！
     validationButtonLabel: 'ブランチを作成したことを確認',
     autoAdvance: true,
   },
+  // Step 2-2: Confirm branch switch (GUI)
+  {
+    id: 23,
+    stage: 'gui',
+    title: 'Step 2: ブランチを確認（GUI）',
+    description: 'ステータスバーが feature/gui-test になっていることを確認します',
+    detailedInstructions: `
+## 作成したブランチの確認
+
+ステータスバー左下のブランチ名が feature/gui-test になっているか確認しましょう。
+必要に応じて \`git branch\` を実行して、現在のブランチが feature/gui-test であることを確かめても構いません。
+
+確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
+    `,
+    allowedCommands: ['status', 'log', 'branch'],
+    hints: [
+      'ステータスバーに feature/gui-test と表示されているか確認してください',
+      'ブランチ一覧を開いて feature/gui-test が選択されているか確認してください',
+    ],
+    successMessage: 'feature/gui-test ブランチにいることを確認できました！',
+    validationRules: [],
+    allowBranchCreation: false,
+    autoAdvance: false,
+  },
   // Step 3-1: Edit file (GUI)
   {
     id: 31,
