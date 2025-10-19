@@ -104,6 +104,10 @@ git clone /remote-repo
     stage: 'terminal',
     title: 'Step 2: 新しいブランチを作成',
     description: '作業用のブランチを作成して切り替えます',
+    illustration: {
+      src: 'https://i.gyazo.com/2d8c7c6f7d2f553748109b854b2d6763.png',
+      alt: 'ブランチ作成と切り替えの状態を示す図'
+    },
     detailedInstructions: `
 ## git branch / git checkout
 
