@@ -731,5 +731,6 @@ VS Codeと同じ操作でブランチを作成できます！
     validationRules: [],
     allowBranchCreation: false,
     autoAdvance: false,
+    showNextButton: false,
   },
 ];

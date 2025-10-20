@@ -21,6 +21,7 @@ export interface StepConfig {
   successMessage: string;
   validationRules: ValidationRule[];
   autoAdvance?: boolean;
+  showNextButton?: boolean;
 }
 
 export type GuiAction =
