@@ -6,6 +6,8 @@ interface StatusBarProps {
   currentBranch: string;
   branches: string[];
   remoteBranches: string[];
+  aheadCount: number;
+  behindCount: number;
   onSwitchBranch: (branch: string) => Promise<void>;
   onCreateBranch: (branch: string) => Promise<boolean>;
   canCreateBranch: boolean;
@@ -165,6 +167,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   currentBranch,
   branches,
   remoteBranches,
+  aheadCount,
+  behindCount,
   onSwitchBranch,
   onCreateBranch,
   canCreateBranch,
@@ -194,8 +198,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({
             </button>
           )}
           <div className="flex items-center gap-1">
-            <span>↓ 0</span>
-            <span>↑ 0</span>
+            <span>↓ {behindCount}</span>
+            <span>↑ {aheadCount}</span>
           </div>
         </div>
       </div>

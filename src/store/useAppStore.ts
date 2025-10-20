@@ -55,6 +55,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     unstagedFiles: [],
     commits: [],
     hasRemote: false,
+    aheadCount: 0,
+    behindCount: 0,
   },
   currentStep: null,
   tutorialState: null,

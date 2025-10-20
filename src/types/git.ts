@@ -22,6 +22,8 @@ export interface GitState {
   unstagedFiles: GitFile[];
   commits: GitCommit[];
   hasRemote: boolean;
+  aheadCount: number;
+  behindCount: number;
 }
 
 export type GitCommand =

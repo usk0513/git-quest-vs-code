@@ -127,6 +127,8 @@ function App() {
         currentBranch={gitState.currentBranch}
         branches={gitState.branches}
         remoteBranches={gitState.remoteBranches}
+        aheadCount={gitState.aheadCount}
+        behindCount={gitState.behindCount}
         onSwitchBranch={switchBranch}
         onCreateBranch={handleCreateBranch}
         canCreateBranch={currentStep.stage === 'gui' && gitState.currentBranch === 'main'}

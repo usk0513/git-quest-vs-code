@@ -18,6 +18,7 @@ export class TutorialService {
   private state: TutorialState;
   private currentStepConfig: StepConfig;
   private pushedBranches: Set<string> = new Set();
+  private unpushedCommits: Map<string, number> = new Map();
 
   private isAutoAdvance(step: StepConfig): boolean {
     return step.autoAdvance !== false;
@@ -51,6 +52,8 @@ export class TutorialService {
     try {
       // Create remote repository
       await this.remoteSimulator.createRemoteRepository();
+      this.unpushedCommits.clear();
+      this.pushedBranches.clear();
       console.log('Tutorial initialized');
     } catch (error) {
       console.error('Error initializing tutorial:', error);
@@ -178,6 +181,8 @@ export class TutorialService {
         }
       }
       await this.git.commit(WORKSPACE_DIR, 'Initial commit');
+      const currentBranch = await this.git.currentBranch(WORKSPACE_DIR);
+      this.unpushedCommits.set(currentBranch, 0);
 
       return {
         success: true,
@@ -286,6 +291,9 @@ export class TutorialService {
     try {
       const message = parsed.message!;
       const sha = await this.git.commit(WORKSPACE_DIR, message);
+      const branch = await this.git.currentBranch(WORKSPACE_DIR);
+      const pending = this.unpushedCommits.get(branch) ?? 0;
+      this.unpushedCommits.set(branch, pending + 1);
       return {
         success: true,
         output: `[${await this.git.currentBranch(WORKSPACE_DIR)} ${sha.substring(0, 7)}] ${message}`,
@@ -308,6 +316,7 @@ export class TutorialService {
 
       if (success) {
         this.pushedBranches.add(branch);
+        this.unpushedCommits.set(branch, 0);
         return {
           success: true,
           output: `To ${remote}\n * [new branch]      ${branch} -> ${branch}`,
@@ -509,6 +518,7 @@ export class TutorialService {
     };
     this.currentStepConfig = TUTORIAL_STEPS[0];
     this.pushedBranches.clear();
+    this.unpushedCommits.clear();
 
     // Reinitialize remote repository
     await this.initialize();
@@ -520,9 +530,12 @@ export class TutorialService {
     this.pushedBranches.forEach((branch) => {
       remoteBranches.add(`origin/${branch}`);
     });
+    const aheadCount = this.unpushedCommits.get(gitState.currentBranch) ?? 0;
     return {
       ...gitState,
       remoteBranches: Array.from(remoteBranches),
+      aheadCount,
+      behindCount: 0,
     };
   }
 

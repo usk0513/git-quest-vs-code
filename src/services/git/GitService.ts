@@ -125,6 +125,8 @@ export class GitService {
           unstagedFiles: [],
           commits: [],
           hasRemote: false,
+          aheadCount: 0,
+          behindCount: 0,
         };
       }
 
@@ -171,6 +173,8 @@ export class GitService {
         unstagedFiles,
         commits,
         hasRemote: false, // We'll implement remote simulation separately
+        aheadCount: 0,
+        behindCount: 0,
       };
     } catch (error) {
       console.error('Error getting git state:', error);
@@ -183,6 +187,8 @@ export class GitService {
         unstagedFiles: [],
         commits: [],
         hasRemote: false,
+        aheadCount: 0,
+        behindCount: 0,
       };
     }
   }
