@@ -13,6 +13,7 @@ interface SidebarProps {
   currentFile: string | null;
   onSelectFile: (filepath: string) => void;
   onStageFile: (filepath: string) => void;
+  onUnstageFile: (filepath: string) => void;
   onCommit: (message: string) => void;
   onPush: () => void;
   sourceControlReadOnly?: boolean;
@@ -27,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentFile,
   onSelectFile,
   onStageFile,
+  onUnstageFile,
   onCommit,
   onPush,
   sourceControlReadOnly = false,
@@ -62,6 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <SourceControlView
             gitState={gitState}
             onStageFile={onStageFile}
+            onUnstageFile={onUnstageFile}
             onCommit={onCommit}
             onPush={onPush}
             readOnly={sourceControlReadOnly}

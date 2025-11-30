@@ -549,6 +549,10 @@ export class TutorialService {
     return await this.fs.readFile(fullPath);
   }
 
+  async unstageFile(filepath: string): Promise<void> {
+    await this.git.resetFile(WORKSPACE_DIR, filepath);
+  }
+
   async getFileList(): Promise<string[]> {
     try {
       const exists = await this.fs.exists(WORKSPACE_DIR);

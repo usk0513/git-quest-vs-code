@@ -52,6 +52,14 @@ export class GitService {
     });
   }
 
+  async resetFile(dir: string, filepath: string): Promise<void> {
+    await git.resetIndex({
+      fs: this.fs.getFS(),
+      dir,
+      filepath,
+    });
+  }
+
   async checkout(dir: string, ref: string): Promise<void> {
     await git.checkout({
       fs: this.fs.getFS(),

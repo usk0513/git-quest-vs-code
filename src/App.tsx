@@ -24,6 +24,7 @@ function App() {
     nextStep,
     setSidebarView,
     stageFile,
+    unstageFile,
     commit,
     push,
     validateCurrentStep,
@@ -82,12 +83,13 @@ function App() {
         <div className="w-80 border-r border-vscode-border">
           <Sidebar
             view={sidebarView}
-            onViewChange={setSidebarView}
-            gitState={gitState}
-            files={files}
-            currentFile={currentFile}
-            onSelectFile={selectFile}
+          onViewChange={setSidebarView}
+          gitState={gitState}
+          files={files}
+          currentFile={currentFile}
+          onSelectFile={selectFile}
           onStageFile={stageFile}
+          onUnstageFile={unstageFile}
           onCommit={commit}
           onPush={push}
           sourceControlReadOnly={sourceControlReadOnly}

@@ -66,4 +66,25 @@ describe('TutorialService git state tracking', () => {
     const mainState = await service.getGitState();
     expect(mainState.aheadCount).toBe(0);
   });
+
+  it('unstages files and moves them back to unstaged list', async () => {
+    const internal = service as any;
+    internal.state.currentStep = 1;
+    internal.state.currentStage = 'terminal';
+    internal.currentStepConfig = TUTORIAL_STEPS[1];
+
+    await service.executeCommand('git clone origin main', { skipValidation: true });
+    await service.executeCommand('git checkout -b feature/gui-test', { skipValidation: true });
+    await service.editFile('greeting.txt', 'Hello staging');
+    await service.executeCommand('git add greeting.txt', { skipValidation: true });
+
+    const beforeUnstage = await service.getGitState();
+    expect(beforeUnstage.stagedFiles).toHaveLength(1);
+
+    await service.unstageFile('greeting.txt');
+    const afterUnstage = await service.getGitState();
+
+    expect(afterUnstage.stagedFiles).toHaveLength(0);
+    expect(afterUnstage.unstagedFiles.some((f) => f.path === 'greeting.txt')).toBe(true);
+  });
 });

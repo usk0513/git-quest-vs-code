@@ -36,6 +36,7 @@ interface AppState {
   refreshGitState: () => Promise<void>;
   setSidebarView: (view: 'source-control' | 'explorer') => void;
   stageFile: (filepath: string) => Promise<void>;
+  unstageFile: (filepath: string) => Promise<void>;
   commit: (message: string) => Promise<void>;
   push: () => Promise<void>;
   validateCurrentStep: () => Promise<void>;
@@ -301,6 +302,36 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error staging file:', error);
+    }
+  },
+
+  // Unstage file (GUI action)
+  unstageFile: async (filepath: string) => {
+    const { tutorialService, gitState } = get();
+
+    if (!tutorialService) {
+      return;
+    }
+
+    try {
+      const state = tutorialService.getState();
+      if (state.currentStage === 'gui' && gitState.currentBranch !== 'feature/gui-test') {
+        set({
+          terminalOutput: [
+            ...get().terminalOutput,
+            'Hint: GUIステージでは feature/gui-test ブランチで操作してください。',
+            '',
+          ],
+        });
+        return;
+      }
+      await tutorialService.unstageFile(filepath);
+      await get().refreshGitState();
+      if (tutorialService.getState().currentStage === 'gui') {
+        await get().validateCurrentStep();
+      }
+    } catch (error) {
+      console.error('Error unstaging file:', error);
     }
   },
 

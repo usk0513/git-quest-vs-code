@@ -5,6 +5,7 @@ import { Button } from '../Common/Button';
 interface SourceControlViewProps {
   gitState: GitState;
   onStageFile: (filepath: string) => void;
+  onUnstageFile: (filepath: string) => void;
   onCommit: (message: string) => void;
   onPush: () => void;
   readOnly?: boolean;
@@ -14,6 +15,7 @@ interface SourceControlViewProps {
 export const SourceControlView: React.FC<SourceControlViewProps> = ({
   gitState,
   onStageFile,
+  onUnstageFile,
   onCommit,
   onPush,
   readOnly = false,
@@ -133,12 +135,23 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
               {gitState.stagedFiles.map((file) => (
                 <div
                   key={file.path}
-                  className="px-3 py-1 hover:bg-vscode-hover flex items-center gap-2 text-sm"
+                  className="px-3 py-1 hover:bg-vscode-hover flex items-center justify-between group text-sm"
                 >
-                  <span className="text-vscode-git-added">
-                    {file.status === 'modified' ? 'M' : file.status === 'added' ? 'A' : 'D'}
-                  </span>
-                  <span className="text-vscode-text">{file.path}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-vscode-git-added">
+                      {file.status === 'modified' ? 'M' : file.status === 'added' ? 'A' : 'D'}
+                    </span>
+                    <span className="text-vscode-text">{file.path}</span>
+                  </div>
+                  <button
+                    onClick={readOnly ? undefined : () => onUnstageFile(file.path)}
+                    className={`${
+                      readOnly ? 'opacity-40 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:bg-vscode-active'
+                    } text-vscode-text px-2 py-1 rounded`}
+                    disabled={readOnly}
+                  >
+                    -
+                  </button>
                 </div>
               ))}
             </div>
