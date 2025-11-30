@@ -85,7 +85,7 @@ git clone /remote-repo
 
 必要に応じて \`git status\` や \`git branch\` を実行して、ワークスペースの状態を確認しても構いません。
 
-確認が終わったら、右上の「次へ」ボタンを押して次のステップへ進んでください。
+確認が終わったら、「次へ」ボタンを押して次のステップへ進んでください。
     `,
     allowedCommands: ['status', 'branch', 'log'],
     allowBranchCreation: false,
@@ -187,7 +187,7 @@ Hello, Git!
 
 ファイルを編集すると、左側のソース管理パネルに変更が表示されます。
 
-編集が終わったら、右側の「編集内容をチェック」ボタンを押して変更が認識されているか確認しましょう。
+編集が終わったら、「編集内容をチェック」ボタンを押して変更が認識されているか確認しましょう。
     `,
     allowedCommands: ['status', 'diff'],
     requiresValidationButton: true,
@@ -436,7 +436,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 まずは作業ブランチからメインブランチに戻りましょう。
 
 1. 画面左下のブランチ名（現在は feature/add-greeting）をクリック
-2. 画面中央に表示されるブランチメニューから main を選択
+2. 画面中央に表示されるブランチメニューから main をクリック
 
 選択するとメインブランチに切り替わります。
     `,
@@ -444,7 +444,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
     allowedGuiActions: ['switch-branch'],
     hints: [
       '画面左下のブランチ名をクリックして一覧を開きます',
-      '表示されたメニューから main を選択します',
+      '表示されたメニューから main をクリックします',
     ],
     successMessage: 'メインブランチに切り替わりました！',
     validationRules: [
@@ -467,7 +467,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 ステータスバー左下のブランチ名が main になっているか確認しましょう。
 必要に応じて \`git branch\` を実行して、現在のブランチが main であることを確かめても構いません。
 
-確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
+確認できたら、「次へ」ボタンで次のステップへ進みましょう。
     `,
     allowedCommands: ['status', 'log', 'branch'],
     hints: [
@@ -497,7 +497,7 @@ export const GUI_TUTORIAL_STEPS: StepConfig[] = [
 1. 画面左下のブランチ名（main）をクリック
 2. 画面中央に表示されるメニューで「+ 新しいブランチの作成...」を選択
 3. ブランチ名を入力: feature/gui-test
-4. Enterキーを押して確定
+4. 「作成」ボタンをクリック
 
 VS Codeと同じ操作でブランチを作成できます！
     `,
@@ -532,7 +532,7 @@ VS Codeと同じ操作でブランチを作成できます！
 
 ステータスバー左下のブランチ名が feature/gui-test になっているか確認しましょう。
 
-確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
+確認できたら、「次へ」ボタンを押して次のステップへ進みましょう。
     `,
     allowedCommands: ['status', 'log', 'branch'],
     hints: [
@@ -596,7 +596,7 @@ VS Codeと同じ操作でブランチを作成できます！
 ソース管理ビューの「変更」セクションに greeting.txt が表示されているか確認しましょう。
 ステータスバー左側のソース管理アイコンをクリックすると、変更の一覧が表示されます。
 
-変更が表示されていることを確認できたら、右上の「次へ」ボタンで次のステップへ進みましょう。
+変更が表示されていることを確認できたら、「次へ」ボタンを押して次のステップへ進みましょう。
     `,
     allowedCommands: ['status', 'log', 'branch'],
     hints: [
