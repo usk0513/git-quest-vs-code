@@ -225,6 +225,16 @@ describe('TutorialService GUI actions and push validation', () => {
     });
   });
 
+  it('lists the branches with git branch on a GUI step', async () => {
+    await prepareGuiBranchWithEdit('Hello, Git Quest!');
+    goToStep(23);
+
+    const result = await service.executeCommand('git branch');
+
+    expect(result.success).toBe(true);
+    expect(result.output).toBe('* feature/gui-test\n  main');
+  });
+
   it('rejects changing actions on confirmation steps without running them', async () => {
     await prepareGuiBranchWithEdit('Hello, Git Quest!');
     goToStep(62);

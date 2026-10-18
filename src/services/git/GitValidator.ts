@@ -41,7 +41,7 @@ export class GitValidator {
         };
       }
 
-      if (options.allowMutatingCommands === false && this.isMutatingCommand(parsed.command)) {
+      if (options.allowMutatingCommands === false && this.isMutatingCommand(parsed)) {
         return {
           passed: false,
           message: `The command "git ${parsed.command}" is disabled in GUI stage`,
@@ -217,15 +217,19 @@ export class GitValidator {
     return { passed: true, message: 'Valid command' };
   }
 
-  private isMutatingCommand(command: GitCommand): boolean {
-    switch (command) {
+  private isMutatingCommand(parsed: ParsedGitCommand): boolean {
+    switch (parsed.command) {
       case 'add':
       case 'commit':
       case 'push':
       case 'clone':
       case 'checkout':
-      case 'branch':
         return true;
+      case 'branch':
+        // Plain "git branch" only lists the branches, like git status and
+        // git log, so the GUI stage allows it. A name or a flag creates,
+        // deletes or renames a branch.
+        return parsed.args.length > 0 || parsed.flags.length > 0;
       default:
         return false;
     }
