@@ -210,6 +210,32 @@ describe('TutorialService GUI actions and push validation', () => {
     expect(result.validationResult?.hint).toContain('「+」ボタン');
   });
 
+  // The branch menu creates the GUI branch only from main (App.tsx), so on
+  // another branch the hint asks for the switch first.
+  it('asks to switch to main before creating the GUI branch from another branch', async () => {
+    goToStep(1);
+    await service.executeCommand('git clone /remote-repo', { skipValidation: true });
+    goToStep(2);
+    await service.executeCommand('git checkout -b feature/add-greeting', { skipValidation: true });
+    goToStep(22);
+
+    const onOtherBranch = await service.validateCurrentStep();
+    expect(onOtherBranch.hint).toBe(
+      '「+ 新しいブランチの作成...」は main ブランチにいるときだけ使えます。先に、画面左下のブランチ名をクリックし、画面上部に表示されるメニューから main をクリックして切り替えてください'
+    );
+
+    const switched = await service.performGuiAction('switch-branch', 'git checkout main');
+    expect(switched.validationResult?.hint).toBe(
+      '画面左下のブランチ名をクリックし、画面上部に表示されるメニューの「+ 新しいブランチの作成...」で feature/gui-test を作成してください'
+    );
+
+    const created = await service.performGuiAction(
+      'create-branch',
+      'git checkout -b feature/gui-test'
+    );
+    expect(created.stepCompleted).toBe(true);
+  });
+
   it('keeps the git command hints in the terminal stage', async () => {
     goToStep(1);
     await service.executeCommand('git clone /remote-repo', { skipValidation: true });

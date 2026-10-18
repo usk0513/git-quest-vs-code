@@ -1,4 +1,5 @@
 import type { ValidationResult, ValidationRule, GitState, TutorialStage } from '@/types';
+import { GUI_BRANCH_BASE } from '@/constants/initialFiles';
 import type { FileSystemService } from '../filesystem/FileSystemService';
 
 export class StepValidator {
@@ -17,7 +18,7 @@ export class StepValidator {
     for (const rule of rules) {
       const result = await this.validateRule(rule, gitState, workspaceDir);
       if (!result.passed) {
-        return stage === 'gui' ? this.guiFailure(rule, result) : result;
+        return stage === 'gui' ? this.guiFailure(rule, result, gitState) : result;
       }
     }
 
@@ -205,7 +206,11 @@ export class StepValidator {
   // repository, so a failed rule must not suggest one. Say what is still
   // missing and which on-screen control does it, in the same words as the
   // step instructions. Rules defined without a target keep their message.
-  private guiFailure(rule: ValidationRule, failed: ValidationResult): ValidationResult {
+  private guiFailure(
+    rule: ValidationRule,
+    failed: ValidationResult,
+    gitState: GitState
+  ): ValidationResult {
     const { target } = rule;
 
     switch (rule.type) {
@@ -214,7 +219,12 @@ export class StepValidator {
         return {
           passed: false,
           message: `${target} ブランチはまだ作成されていません`,
-          hint: `画面左下のブランチ名をクリックし、画面上部に表示されるメニューの「+ 新しいブランチの作成...」で ${target} を作成してください`,
+          // The create item is disabled on any other branch (see App.tsx),
+          // so ask for the switch first.
+          hint:
+            gitState.currentBranch === GUI_BRANCH_BASE
+              ? `画面左下のブランチ名をクリックし、画面上部に表示されるメニューの「+ 新しいブランチの作成...」で ${target} を作成してください`
+              : `「+ 新しいブランチの作成...」は ${GUI_BRANCH_BASE} ブランチにいるときだけ使えます。先に、画面左下のブランチ名をクリックし、画面上部に表示されるメニューから ${GUI_BRANCH_BASE} をクリックして切り替えてください`,
         };
 
       case 'branch-switched':
