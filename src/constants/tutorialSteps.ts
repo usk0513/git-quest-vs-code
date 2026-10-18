@@ -1,4 +1,4 @@
-import { StepConfig } from '@/types';
+import type { StepConfig } from '@/types';
 
 export const TUTORIAL_STEPS: StepConfig[] = [
   // Step 0: Initial state
@@ -725,7 +725,7 @@ VS Codeと同じ操作でブランチを作成できます！
     allowedCommands: ['status', 'log', 'branch'],
     hints: [
       'ステータスバー左下のブランチ名をクリックしてください',
-      '一覧に \`origin/feature/gui-test\` が表示されているか確認してください',
+      '一覧に `origin/feature/gui-test` が表示されているか確認してください',
     ],
     successMessage: 'リモートへの反映を確認できました！お疲れさまでした！',
     validationRules: [],

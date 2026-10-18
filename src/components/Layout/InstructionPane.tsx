@@ -1,5 +1,5 @@
-import React from 'react';
-import { StepConfig } from '@/types';
+import type React from 'react';
+import type { StepConfig } from '@/types';
 import { Button } from '../Common/Button';
 
 interface InstructionPaneProps {

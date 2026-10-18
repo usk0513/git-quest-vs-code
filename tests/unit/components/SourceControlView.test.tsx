@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SourceControlView } from '@/components/SourceControl/SourceControlView';
-import { GitState } from '@/types';
+import type { GitState } from '@/types';
 
 const baseGitState: GitState = {
   isRepository: true,

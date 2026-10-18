@@ -1,4 +1,4 @@
-import { GitCommand, ValidationResult } from '@/types';
+import type { GitCommand, ValidationResult } from '@/types';
 import { CommandParser } from '../terminal/CommandParser';
 
 interface CommandValidationOptions {

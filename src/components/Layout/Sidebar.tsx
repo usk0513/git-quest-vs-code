@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import { SourceControlView } from '../SourceControl/SourceControlView';
 import { ExplorerView } from '../Explorer/ExplorerView';
-import { GitState } from '@/types';
+import type { GitState } from '@/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolder, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 

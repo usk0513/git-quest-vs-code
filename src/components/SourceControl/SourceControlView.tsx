@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { GitState } from '@/types';
+import type React from 'react';
+import { useState } from 'react';
+import type { GitState } from '@/types';
 import { Button } from '../Common/Button';
 
 interface SourceControlViewProps {

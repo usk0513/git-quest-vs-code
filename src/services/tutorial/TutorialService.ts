@@ -1,16 +1,16 @@
-import {
+import type {
   CommandExecutionResult,
   GuiAction,
   TutorialState,
   StepConfig,
   ValidationResult,
 } from '@/types';
-import { FileSystemService } from '../filesystem/FileSystemService';
-import { GitService } from '../git/GitService';
-import { GitValidator } from '../git/GitValidator';
-import { RemoteSimulator } from '../git/RemoteSimulator';
-import { CommandParser } from '../terminal/CommandParser';
-import { StepValidator } from './StepValidator';
+import type { FileSystemService } from '../filesystem/FileSystemService';
+import type { GitService } from '../git/GitService';
+import type { GitValidator } from '../git/GitValidator';
+import type { RemoteSimulator } from '../git/RemoteSimulator';
+import type { CommandParser } from '../terminal/CommandParser';
+import type { StepValidator } from './StepValidator';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
 import { WORKSPACE_DIR } from '@/constants/initialFiles';
 

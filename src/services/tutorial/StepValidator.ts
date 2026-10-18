@@ -1,5 +1,5 @@
-import { ValidationResult, ValidationRule, GitState } from '@/types';
-import { FileSystemService } from '../filesystem/FileSystemService';
+import type { ValidationResult, ValidationRule, GitState } from '@/types';
+import type { FileSystemService } from '../filesystem/FileSystemService';
 
 export class StepValidator {
   private fs: FileSystemService;

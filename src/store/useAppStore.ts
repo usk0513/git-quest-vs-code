@@ -9,7 +9,7 @@ import {
   getFileSystemService,
   resetFileSystem,
 } from '@/services/filesystem/FileSystemService';
-import { GitState, GuiAction, StepConfig, TutorialState, CommandExecutionResult } from '@/types';
+import type { GitState, GuiAction, StepConfig, TutorialState, CommandExecutionResult } from '@/types';
 
 const GUI_BRANCH = 'feature/gui-test';
 const GUI_BRANCH_HINT = `Hint: GUIステージでは ${GUI_BRANCH} ブランチで操作してください。`;
