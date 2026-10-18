@@ -77,6 +77,14 @@ export class GitService {
     return branch || 'main';
   }
 
+  async resolveRef(dir: string, ref: string): Promise<string> {
+    return await git.resolveRef({
+      fs: this.fs.getFS(),
+      dir,
+      ref,
+    });
+  }
+
   async listBranches(dir: string): Promise<string[]> {
     const branches = await git.listBranches({
       fs: this.fs.getFS(),
