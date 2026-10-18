@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    # Superseded runs of the same pull request are cancelled. Runs called from
+    # the deploy workflow get a per-run group so they are never cancelled here.
+    concurrency:
+      group: ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # The project .npmrc routes installs through Takumi Guard and sets a
+      # 7-day min-release-age (npm >= 11.10). Fail fast if either is not applied.
+      - name: Check npm configuration
+        run: |
+          node --version
+          npm --version
+          test "$(npm config get registry)" = "https://npm.flatt.tech/"
+          test "$(npm config get min-release-age)" = "7"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      # Verify against npmjs directly so the registry keys come from TUF
+      # instead of the proxy.
+      - name: Verify registry signatures
+        run: npm audit signatures --registry=https://registry.npmjs.org/

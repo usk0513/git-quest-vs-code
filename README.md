@@ -20,7 +20,7 @@ Git Questは、Gitの基本的な操作をブラウザ上で学習できる教�
 ### 必要な環境
 
 - **Node.js**: 24.x（LTS）
-- **npm**: 11.x（Node.js 24 に同梱）
+- **npm**: 11.10 以上（Node.js 24 に同梱。`.npmrc` の `min-release-age` に必要）
 
 ### インストール・起動手順
 
@@ -34,8 +34,10 @@ Git Questは、Gitの基本的な操作をブラウザ上で学習できる教�
 2. **依存関係をインストール**
 
    ```bash
-   npm install
+   npm ci
    ```
+
+   `npm ci` は `package-lock.json` に固定されたバージョンをそのままインストールします。
 
 3. **開発サーバーを起動**
 
@@ -69,6 +71,52 @@ npm run test:coverage
 # リント（コード品質チェック）
 npm run lint
 ```
+
+### 依存パッケージの取得とセキュリティ設定
+
+リポジトリ直下の `.npmrc` で、パッケージの取得方法を次のように設定しています。
+
+```ini
+registry=https://npm.flatt.tech/
+min-release-age=7
+```
+
+- **`registry`（Takumi Guard）**：すべてのパッケージを [Takumi Guard](https://shisho.dev/docs/ja/t/guard/quickstart/npm/) 経由で取得します。既知の悪意あるパッケージは `403 Forbidden` で拒否されます。認証は不要です（匿名モード）。
+- **`min-release-age=7`**：`npm install` や `npm update` で新しいバージョンを選ぶとき、公開から7日以上経ったものだけを使います。公開直後に乗っ取られた版を避けるための設定です。`npm ci` は `package-lock.json` に固定された版をそのまま使うので、この設定の影響を受けません。
+
+#### 公開から7日未満のセキュリティ修正を入れる場合
+
+修正版が公開から7日経っていない場合、通常の `npm install` では選ばれません（`ETARGET` エラーになります）。急ぐ場合は、その1回だけ設定を外して入れ、理由を Pull Request に記録してください。
+
+```bash
+npm install <パッケージ>@<修正版> --min-release-age=0
+```
+
+`.npmrc` の `min-release-age-exclude` に恒久的に登録するのは避けてください。
+
+#### `package-lock.json` の取得元
+
+`.npmrc` を設定した状態で依存を追加・更新すると、そのエントリの `resolved` には `https://npm.flatt.tech/` が記録されます（npm 11.15 以降の仕様）。既存の `https://registry.npmjs.org/` のエントリと混在していても、問題なく動作します。
+
+#### インストールが `403 Forbidden` になった場合
+
+Takumi Guard が、そのパッケージを悪意あるものとしてブロックしています。設定を外して回避せず、該当するパッケージとバージョンを調べてください。
+
+#### Takumi Guard の利用をやめる場合
+
+1. `.npmrc` から `registry=` の行を削除する
+2. `package-lock.json` の `resolved` にある `https://npm.flatt.tech/` を `https://registry.npmjs.org/` に置き換える（パスと `integrity` は同じなので、そのまま置き換えられます）
+3. `.github/dependabot.yml` から `registries` の設定を削除する
+4. `.github/workflows/ci.yml` の「Check npm configuration」で、`npm config get registry` の比較先を `https://registry.npmjs.org/` に変更する（変更しないと、CI がこの確認で失敗します。`min-release-age` の確認はそのまま残します）
+
+#### CI での確認
+
+Pull Request と `main` へのデプロイでは、`.github/workflows/ci.yml` が次を確認します。
+
+- `.npmrc` の設定が反映されていること
+- `npm ci`、ビルド、カバレッジ付きテストが成功すること
+- 本番依存に既知の脆弱性がないこと（`npm audit --omit=dev`）
+- レジストリ署名を検証できること（`npm audit signatures`）
 
 ## 📚 使い方
 
