@@ -111,11 +111,12 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                   </div>
                   <button
                     type="button"
+                    aria-label={`${file.path} をステージ`}
                     onClick={readOnly ? undefined : () => onStageFile(file.path)}
                     className={`${
                       readOnly
                         ? 'opacity-40 cursor-not-allowed'
-                        : 'opacity-0 group-hover:opacity-100 hover-none:opacity-100 hover:bg-vscode-active'
+                        : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover-none:opacity-100 hover:bg-vscode-active'
                     } text-vscode-accent px-2 py-1 rounded`}
                     disabled={readOnly}
                   >
@@ -149,11 +150,12 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                   </div>
                   <button
                     type="button"
+                    aria-label={`${file.path} のステージを取り消す`}
                     onClick={readOnly ? undefined : () => onUnstageFile(file.path)}
                     className={`${
                       readOnly
                         ? 'opacity-40 cursor-not-allowed'
-                        : 'opacity-0 group-hover:opacity-100 hover-none:opacity-100 hover:bg-vscode-active'
+                        : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover-none:opacity-100 hover:bg-vscode-active'
                     } text-vscode-text px-2 py-1 rounded`}
                     disabled={readOnly}
                   >
