@@ -29,6 +29,13 @@
 }
 
 /*
+  Tailwind 4 applies hover variants only inside @media (hover: hover), so on
+  touch devices that cannot hover a group-hover:opacity-100 control stays
+  hidden. Use hover-none: to keep such controls visible there.
+*/
+@custom-variant hover-none (@media (hover: none));
+
+/*
   Base styles live in the base layer. Tailwind 4 emits utilities into a
   native cascade layer, and unlayered rules beat every layered rule, so a
   global rule outside a layer would override utilities such as p-4 or m-2.
