@@ -5,7 +5,8 @@ import { GitValidator } from '@/services/git/GitValidator';
 import { RemoteSimulator } from '@/services/git/RemoteSimulator';
 import { CommandParser } from '@/services/terminal/CommandParser';
 import { StepValidator } from '@/services/tutorial/StepValidator';
-import { getFileSystemService, resetFileSystem } from '@/services/filesystem/FileSystemService';
+import { getFileSystemService } from '@/services/filesystem/FileSystemService';
+import { resetTestFileSystem } from '../../../setup/testFileSystem';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
 import { StepConfig } from '@/types';
 
@@ -42,7 +43,7 @@ describe('TutorialService GUI actions and push validation', () => {
   };
 
   beforeEach(async () => {
-    resetFileSystem();
+    resetTestFileSystem();
     const fs = getFileSystemService();
     const git = new GitService(fs);
     service = new TutorialService(

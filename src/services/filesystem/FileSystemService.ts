@@ -139,7 +139,10 @@ export const getFileSystemService = (): FileSystemService => {
   return fsInstance;
 };
 
-export const resetFileSystem = (): FileSystemService => {
-  fsInstance = new FileSystemService('git-quest-fs', true);
+// `name` selects the IndexedDB database. Tests pass a unique name so that a
+// previous instance's delayed superblock save (LightningFS debounces it by
+// 500 ms) cannot overwrite the freshly wiped database of the next test.
+export const resetFileSystem = (name: string = 'git-quest-fs'): FileSystemService => {
+  fsInstance = new FileSystemService(name, true);
   return fsInstance;
 };

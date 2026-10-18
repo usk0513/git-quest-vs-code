@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useAppStore } from '@/store/useAppStore';
-import { resetFileSystem } from '@/services/filesystem/FileSystemService';
+import { resetTestFileSystem } from '../../setup/testFileSystem';
 import { TutorialService } from '@/services/tutorial/TutorialService';
 import { GitService } from '@/services/git/GitService';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
@@ -30,7 +30,7 @@ const countLines = (lines: string[], text: string) => lines.filter((line) => lin
 // Walks the tutorial to GUI step 31 (edit file) using only the public store
 // API, then edits greeting.txt so the step's check can pass.
 const walkToGuiEditStepWithEdit = async () => {
-  resetFileSystem();
+  resetTestFileSystem();
   await useAppStore.getState().initialize();
   const store = useAppStore.getState();
 
@@ -63,7 +63,7 @@ describe('useAppStore GUI actions', () => {
 
   // Puts the store at GUI step 41 on feature/gui-test with greeting.txt edited.
   beforeEach(async () => {
-    resetFileSystem();
+    resetTestFileSystem();
     await useAppStore.getState().initialize();
     service = useAppStore.getState().tutorialService as TutorialService;
 
