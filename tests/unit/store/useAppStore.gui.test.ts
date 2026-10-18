@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useAppStore } from '@/store/useAppStore';
 import { resetFileSystem } from '@/services/filesystem/FileSystemService';
 import { TutorialService } from '@/services/tutorial/TutorialService';
+import { GitService } from '@/services/git/GitService';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
 import { StepConfig } from '@/types';
 
@@ -25,6 +26,37 @@ const goToStep = (service: TutorialService, id: number) => {
 };
 
 const countLines = (lines: string[], text: string) => lines.filter((line) => line === text).length;
+
+// Walks the tutorial to GUI step 31 (edit file) using only the public store
+// API, then edits greeting.txt so the step's check can pass.
+const walkToGuiEditStepWithEdit = async () => {
+  resetFileSystem();
+  await useAppStore.getState().initialize();
+  const store = useAppStore.getState();
+
+  await store.nextStep();
+  await store.executeCommand('git clone /remote-repo');
+  await store.nextStep();
+  await store.executeCommand('git checkout -b feature/add-greeting');
+  await store.nextStep();
+  await store.editFile('greeting.txt', 'Hello, Git!');
+  await store.validateCurrentStep();
+  await store.nextStep();
+  await store.executeCommand('git add greeting.txt');
+  await store.nextStep();
+  await store.executeCommand('git commit -m "Add greeting message"');
+  await store.nextStep();
+  await store.executeCommand('git push origin feature/add-greeting');
+  await store.nextStep();
+  await store.switchBranch('main');
+  await store.nextStep();
+  await store.createBranch('feature/gui-test');
+  await store.nextStep();
+  expect(useAppStore.getState().currentStep?.id).toBe(31);
+
+  await store.editFile('greeting.txt', 'Hello, Git Quest!');
+  useAppStore.setState({ terminalOutput: [] });
+};
 
 describe('useAppStore GUI actions', () => {
   let service: TutorialService;
@@ -72,38 +104,47 @@ describe('useAppStore GUI actions', () => {
   });
 
   it('stops at the confirmation step when two edit checks run at the same time', async () => {
-    // Walk the tutorial to GUI step 31 using only the public store API.
-    resetFileSystem();
-    await useAppStore.getState().initialize();
+    await walkToGuiEditStepWithEdit();
     const store = useAppStore.getState();
-    const stepId = () => useAppStore.getState().currentStep?.id;
-
-    await store.nextStep();
-    await store.executeCommand('git clone /remote-repo');
-    await store.nextStep();
-    await store.executeCommand('git checkout -b feature/add-greeting');
-    await store.nextStep();
-    await store.editFile('greeting.txt', 'Hello, Git!');
-    await store.validateCurrentStep();
-    await store.nextStep();
-    await store.executeCommand('git add greeting.txt');
-    await store.nextStep();
-    await store.executeCommand('git commit -m "Add greeting message"');
-    await store.nextStep();
-    await store.executeCommand('git push origin feature/add-greeting');
-    await store.nextStep();
-    await store.switchBranch('main');
-    await store.nextStep();
-    await store.createBranch('feature/gui-test');
-    await store.nextStep();
-    expect(stepId()).toBe(31);
-
-    await store.editFile('greeting.txt', 'Hello, Git Quest!');
-    useAppStore.setState({ terminalOutput: [] });
 
     await Promise.all([store.validateCurrentStep(), store.validateCurrentStep()]);
 
-    expect(stepId()).toBe(32);
+    expect(useAppStore.getState().currentStep?.id).toBe(32);
+    const output = useAppStore.getState().terminalOutput;
+    expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
+  });
+
+  it('prints the edit success once even when the second check reads git state late', async () => {
+    await walkToGuiEditStepWithEdit();
+    const store = useAppStore.getState();
+    const tutorialService = store.tutorialService as TutorialService;
+
+    // Hold back the second git state read until the first check has
+    // completed step 31, so the second check resumes after the step changed.
+    const git = (tutorialService as unknown as { git: GitService }).git;
+    const readGitState = git.getGitState.bind(git);
+    let releaseSecondRead!: () => void;
+    const secondReadGate = new Promise<void>((resolve) => {
+      releaseSecondRead = resolve;
+    });
+    let reads = 0;
+    git.getGitState = async (dir: string) => {
+      const readNumber = ++reads;
+      const state = await readGitState(dir);
+      if (readNumber === 2) {
+        await secondReadGate;
+      }
+      return state;
+    };
+
+    const firstCheck = store.validateCurrentStep();
+    const secondCheck = store.validateCurrentStep();
+    await firstCheck;
+    expect(useAppStore.getState().currentStep?.id).toBe(32);
+    releaseSecondRead();
+    await secondCheck;
+
+    expect(useAppStore.getState().currentStep?.id).toBe(32);
     const output = useAppStore.getState().terminalOutput;
     expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
   });

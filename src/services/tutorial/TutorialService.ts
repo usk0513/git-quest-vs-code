@@ -83,6 +83,10 @@ export class TutorialService {
     commandString: string,
     options: { skipValidation?: boolean } = {}
   ): Promise<CommandExecutionResult> {
+    // The step this command was issued for. Captured before any await so a
+    // check that finishes while the command runs cannot change it.
+    const stepAtStart = this.currentStepConfig;
+
     try {
       // Step 0 doesn't allow commands
       if (this.state.currentStep === 0) {
@@ -124,7 +128,7 @@ export class TutorialService {
       let validationResult: ValidationResult | null = null;
       if (result.success) {
         // Check if step is completed
-        validationResult = await this.checkStepCompletion();
+        validationResult = await this.checkStepCompletion(stepAtStart);
       }
 
       return {
@@ -432,11 +436,13 @@ export class TutorialService {
     }
   }
 
-  private async checkStepCompletion(): Promise<ValidationResult> {
+  // checkedStep is the step the caller wants to complete. It must be taken
+  // before the first await: advanceStep() replaces currentStepConfig, and the
+  // success message must come from the step that was completed.
+  private async checkStepCompletion(
+    checkedStep: StepConfig = this.currentStepConfig
+  ): Promise<ValidationResult> {
     const gitState = await this.git.getGitState(WORKSPACE_DIR);
-    // Keep the step being checked: advanceStep() replaces currentStepConfig,
-    // and the success message must come from the step that was completed.
-    const checkedStep = this.currentStepConfig;
 
     const rules = await Promise.all(
       checkedStep.validationRules.map(async (rule) => {
