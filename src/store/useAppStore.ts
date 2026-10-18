@@ -30,7 +30,11 @@ const formatCommandResult = (
       lines.push(`Hint: ${result.hint}`);
     }
   }
-  if (result.validationResult && !result.validationResult.passed) {
+  if (
+    result.validationResult &&
+    !result.validationResult.passed &&
+    !result.validationResult.superseded
+  ) {
     lines.push(result.validationResult.message);
     if (result.validationResult.hint) {
       lines.push(`Hint: ${result.validationResult.hint}`);
@@ -401,19 +405,23 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const validation = await tutorialService.validateCurrentStep();
 
-    const newOutput = [...get().terminalOutput];
-    if (validation.passed) {
-      if (previousStep.successMessage) {
-        newOutput.push(`✓ ${previousStep.successMessage}`);
+    // A superseded check was already reported by the check that completed
+    // the step, so print nothing for it.
+    if (!validation.superseded) {
+      const newOutput = [...get().terminalOutput];
+      if (validation.passed) {
+        if (previousStep.successMessage) {
+          newOutput.push(`✓ ${previousStep.successMessage}`);
+        }
+      } else {
+        newOutput.push(validation.message);
+        if (validation.hint) {
+          newOutput.push(`Hint: ${validation.hint}`);
+        }
       }
-    } else {
-      newOutput.push(validation.message);
-      if (validation.hint) {
-        newOutput.push(`Hint: ${validation.hint}`);
-      }
+      newOutput.push('');
+      set({ terminalOutput: newOutput });
     }
-    newOutput.push('');
-    set({ terminalOutput: newOutput });
 
     await get().refreshGitState();
 

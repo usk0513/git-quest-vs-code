@@ -124,6 +124,22 @@ describe('TutorialService GUI actions and push validation', () => {
     expect(stage.validationResult?.message).toBe(findStep(41).successMessage);
   });
 
+  it('discards an overlapping check instead of advancing the next step', async () => {
+    await prepareGuiBranchWithEdit('Hello, Git Quest!');
+    goToStep(31);
+
+    const results = await Promise.all([
+      service.validateCurrentStep(),
+      service.validateCurrentStep(),
+    ]);
+
+    // One check completes step 31; the other is discarded, so the tutorial
+    // stops at confirmation step 32 instead of moving on to 41.
+    expect(service.getState().currentStep).toBe(32);
+    expect(results.filter((r) => r.passed)).toHaveLength(1);
+    expect(results.filter((r) => r.superseded)).toHaveLength(1);
+  });
+
   it('rejects changing actions on confirmation steps without running them', async () => {
     await prepareGuiBranchWithEdit('Hello, Git Quest!');
     goToStep(62);

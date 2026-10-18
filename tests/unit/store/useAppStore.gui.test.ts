@@ -71,6 +71,43 @@ describe('useAppStore GUI actions', () => {
     expect(useAppStore.getState().currentStep?.id).toBe(62);
   });
 
+  it('stops at the confirmation step when two edit checks run at the same time', async () => {
+    // Walk the tutorial to GUI step 31 using only the public store API.
+    resetFileSystem();
+    await useAppStore.getState().initialize();
+    const store = useAppStore.getState();
+    const stepId = () => useAppStore.getState().currentStep?.id;
+
+    await store.nextStep();
+    await store.executeCommand('git clone /remote-repo');
+    await store.nextStep();
+    await store.executeCommand('git checkout -b feature/add-greeting');
+    await store.nextStep();
+    await store.editFile('greeting.txt', 'Hello, Git!');
+    await store.validateCurrentStep();
+    await store.nextStep();
+    await store.executeCommand('git add greeting.txt');
+    await store.nextStep();
+    await store.executeCommand('git commit -m "Add greeting message"');
+    await store.nextStep();
+    await store.executeCommand('git push origin feature/add-greeting');
+    await store.nextStep();
+    await store.switchBranch('main');
+    await store.nextStep();
+    await store.createBranch('feature/gui-test');
+    await store.nextStep();
+    expect(stepId()).toBe(31);
+
+    await store.editFile('greeting.txt', 'Hello, Git Quest!');
+    useAppStore.setState({ terminalOutput: [] });
+
+    await Promise.all([store.validateCurrentStep(), store.validateCurrentStep()]);
+
+    expect(stepId()).toBe(32);
+    const output = useAppStore.getState().terminalOutput;
+    expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
+  });
+
   it('refuses a push before staging and stays on the staging step', async () => {
     await useAppStore.getState().push();
 

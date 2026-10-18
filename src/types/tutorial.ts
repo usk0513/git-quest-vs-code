@@ -44,6 +44,9 @@ export interface ValidationResult {
   passed: boolean;
   message: string;
   hint?: string;
+  // The step changed while this check was running (another check completed
+  // it first), so the result was discarded and must not be reported.
+  superseded?: boolean;
 }
 
 export interface CommandExecutionResult {

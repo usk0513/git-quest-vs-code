@@ -456,6 +456,13 @@ export class TutorialService {
       WORKSPACE_DIR
     );
 
+    // Checks can overlap (e.g. a validate button pressed twice). If another
+    // check already moved past checkedStep, applying this result would
+    // advance the following step as well, so discard it.
+    if (this.currentStepConfig !== checkedStep) {
+      return { passed: false, message: '', superseded: true };
+    }
+
     if (!validation.passed) {
       return validation;
     }
