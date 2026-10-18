@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { GitState } from '@/types';
+import type React from 'react';
+import { useState } from 'react';
+import type { GitState } from '@/types';
 import { Button } from '../Common/Button';
 
 interface SourceControlViewProps {
@@ -109,6 +110,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                     <span className="text-vscode-text">{file.path}</span>
                   </div>
                   <button
+                    type="button"
                     onClick={readOnly ? undefined : () => onStageFile(file.path)}
                     className={`${
                       readOnly ? 'opacity-40 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:bg-vscode-active'
@@ -144,6 +146,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                     <span className="text-vscode-text">{file.path}</span>
                   </div>
                   <button
+                    type="button"
                     onClick={readOnly ? undefined : () => onUnstageFile(file.path)}
                     className={`${
                       readOnly ? 'opacity-40 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:bg-vscode-active'

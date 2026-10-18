@@ -535,6 +535,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run lint -- --reporter=github  # Biome（エラー・警告0件）
       - run: npm run build
       - run: npm run test:coverage                # カバレッジ付きテスト
       - run: npm audit --omit=dev                 # 本番依存の既知脆弱性

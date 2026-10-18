@@ -1,5 +1,5 @@
-import { ValidationResult, ValidationRule, GitState } from '@/types';
-import { FileSystemService } from '../filesystem/FileSystemService';
+import type { ValidationResult, ValidationRule, GitState } from '@/types';
+import type { FileSystemService } from '../filesystem/FileSystemService';
 
 export class StepValidator {
   private fs: FileSystemService;
@@ -31,25 +31,34 @@ export class StepValidator {
     gitState: GitState,
     workspaceDir: string
   ): Promise<ValidationResult> {
+    // Rules that check a file or branch name need a target; a step defined
+    // without one fails validation instead of comparing against undefined.
+    const { target } = rule;
+
     switch (rule.type) {
       case 'file-exists':
-        return await this.validateFileExists(rule.target!, workspaceDir);
+        if (!target) return this.missingTarget(rule);
+        return await this.validateFileExists(target, workspaceDir);
 
       case 'file-staged':
-        return this.validateFileStaged(rule.target!, gitState);
+        if (!target) return this.missingTarget(rule);
+        return this.validateFileStaged(target, gitState);
 
       case 'commit-made':
         return this.validateCommitMade(rule, gitState);
 
       case 'branch-created':
-        return this.validateBranchCreated(rule.target!, gitState);
+        if (!target) return this.missingTarget(rule);
+        return this.validateBranchCreated(target, gitState);
 
       case 'branch-switched':
-        return this.validateBranchSwitched(rule.target!, gitState);
+        if (!target) return this.missingTarget(rule);
+        return this.validateBranchSwitched(target, gitState);
 
       case 'file-content':
+        if (!target) return this.missingTarget(rule);
         return await this.validateFileContent(
-          rule.target!,
+          target,
           rule.expectedValue as string,
           workspaceDir
         );
@@ -182,13 +191,20 @@ export class StepValidator {
         passed: true,
         message: `File ${filepath} has correct content`,
       };
-    } catch (error) {
+    } catch {
       return {
         passed: false,
         message: `Cannot read file ${filepath}`,
         hint: 'Make sure the file exists and is readable',
       };
     }
+  }
+
+  private missingTarget(rule: ValidationRule): ValidationResult {
+    return {
+      passed: false,
+      message: `Validation rule "${rule.type}" has no target`,
+    };
   }
 
   private validatePushed(rule: ValidationRule): ValidationResult {

@@ -8,7 +8,7 @@ import { StepValidator } from '@/services/tutorial/StepValidator';
 import { getFileSystemService } from '@/services/filesystem/FileSystemService';
 import { resetTestFileSystem } from '../../../setup/testFileSystem';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
-import { StepConfig } from '@/types';
+import type { StepConfig } from '@/types';
 
 const findStep = (id: number): StepConfig => {
   const step = [...TUTORIAL_STEPS, ...GUI_TUTORIAL_STEPS].find((s) => s.id === id);

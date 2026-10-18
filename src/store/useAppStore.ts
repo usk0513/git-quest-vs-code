@@ -9,7 +9,8 @@ import {
   getFileSystemService,
   resetFileSystem,
 } from '@/services/filesystem/FileSystemService';
-import { GitState, GuiAction, StepConfig, TutorialState, CommandExecutionResult } from '@/types';
+import type { GitState, GuiAction, StepConfig, TutorialState, CommandExecutionResult } from '@/types';
+import { getErrorMessage } from '@/utils/errors';
 
 const GUI_BRANCH = 'feature/gui-test';
 const GUI_BRANCH_HINT = `Hint: GUIステージでは ${GUI_BRANCH} ブランチで操作してください。`;
@@ -179,11 +180,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       set({ currentStep, tutorialState });
 
-    } catch (error: any) {
+    } catch (error) {
       set({
         terminalOutput: [
           ...get().terminalOutput,
-          `Error: ${error.message}`,
+          `Error: ${getErrorMessage(error, 'Command execution failed')}`,
           '',
         ],
       });

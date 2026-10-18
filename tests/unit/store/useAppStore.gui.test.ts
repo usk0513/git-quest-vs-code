@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useAppStore } from '@/store/useAppStore';
 import { resetTestFileSystem } from '../../setup/testFileSystem';
-import { TutorialService } from '@/services/tutorial/TutorialService';
-import { GitService } from '@/services/git/GitService';
+import type { TutorialService } from '@/services/tutorial/TutorialService';
+import type { GitService } from '@/services/git/GitService';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
-import { StepConfig } from '@/types';
+import type { StepConfig } from '@/types';
 
 const findStep = (id: number): StepConfig => {
   const step = [...TUTORIAL_STEPS, ...GUI_TUTORIAL_STEPS].find((s) => s.id === id);

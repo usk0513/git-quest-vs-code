@@ -1,4 +1,4 @@
-import { ParsedGitCommand, GitCommand } from '@/types';
+import type { ParsedGitCommand, GitCommand } from '@/types';
 
 export class CommandParser {
   parse(commandString: string): ParsedGitCommand {

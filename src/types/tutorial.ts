@@ -1,4 +1,4 @@
-import { GitCommand } from './git';
+import type { GitCommand } from './git';
 
 export type TutorialStage = 'terminal' | 'gui';
 

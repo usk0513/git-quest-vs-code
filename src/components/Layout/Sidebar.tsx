@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import { SourceControlView } from '../SourceControl/SourceControlView';
 import { ExplorerView } from '../Explorer/ExplorerView';
-import { GitState } from '@/types';
+import type { GitState } from '@/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolder, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 
@@ -39,6 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Icon bar */}
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col items-center py-2 gap-2">
         <button
+          type="button"
           onClick={() => onViewChange('explorer')}
           className={`w-10 h-10 flex items-center justify-center rounded hover:bg-vscode-hover ${
             view === 'explorer' ? 'bg-vscode-active' : ''
@@ -48,6 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <FontAwesomeIcon icon={faFolder} size="lg" />
         </button>
         <button
+          type="button"
           onClick={() => onViewChange('source-control')}
           className={`w-10 h-10 flex items-center justify-center rounded hover:bg-vscode-hover ${
             view === 'source-control' ? 'bg-vscode-active' : ''

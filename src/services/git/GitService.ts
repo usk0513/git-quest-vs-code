@@ -1,6 +1,6 @@
 import git from 'isomorphic-git';
-import { FileSystemService } from '../filesystem/FileSystemService';
-import { GitState, GitFile, GitCommit } from '@/types';
+import type { FileSystemService } from '../filesystem/FileSystemService';
+import type { GitState, GitFile, GitCommit } from '@/types';
 
 type DiffLine = {
   type: 'context' | 'add' | 'remove';

@@ -1,4 +1,5 @@
 import * as LightningFSModule from '@isomorphic-git/lightning-fs';
+import { hasErrorCode } from '@/utils/errors';
 
 type LightningFSInstance = {
   promises: {
@@ -62,9 +63,9 @@ export class FileSystemService {
   async mkdir(dirpath: string): Promise<void> {
     try {
       await this.pfs.mkdir(dirpath);
-    } catch (error: any) {
+    } catch (error) {
       // Ignore if directory already exists
-      if (error.code !== 'EEXIST') {
+      if (!hasErrorCode(error, 'EEXIST')) {
         console.error(`Error creating directory ${dirpath}:`, error);
         throw error;
       }

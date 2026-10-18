@@ -37,7 +37,7 @@ npm install -D @types/react @types/react-dom
 npm install -D vitest @vitest/ui jsdom
 npm install -D @testing-library/react @testing-library/jest-dom @testing-library/user-event
 npm install -D tailwindcss postcss autoprefixer
-npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
+npm install -D --save-exact @biomejs/biome   # リント（設定は biome.json）
 ```
 
 ### 2.2 設定ファイル作成

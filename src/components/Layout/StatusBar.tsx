@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '../Common/Button';
 
@@ -44,6 +45,17 @@ const BranchMenu: React.FC<{
     }
   }, [showCreateInput]);
 
+  // Escape closes the menu, like clicking outside the panel.
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleCreate = async () => {
     if (isProcessing) return;
     const trimmed = newBranchName.trim();
@@ -65,12 +77,23 @@ const BranchMenu: React.FC<{
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-30" onClick={onClose}>
-      <div className="w-full flex justify-center" style={{ paddingTop: '3.25rem' }}>
-        <div
-          className="bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden"
-          onClick={(event) => event.stopPropagation()}
-        >
+    <div className="fixed inset-0 z-30">
+      {/* The backdrop is a sibling of the panel (not its parent), so clicks
+          inside the panel never reach it and no buttons are nested. It is
+          skipped in the tab order; keyboard users close with Escape or the
+          close button. */}
+      <button
+        type="button"
+        aria-label="ブランチメニューを閉じる"
+        tabIndex={-1}
+        className="absolute inset-0 w-full h-full cursor-default"
+        onClick={onClose}
+      />
+      <div
+        className="relative w-full flex justify-center pointer-events-none"
+        style={{ paddingTop: '3.25rem' }}
+      >
+        <div className="pointer-events-auto bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden">
           <div className="p-3 border-b border-vscode-border text-sm font-semibold text-vscode-text">
             ブランチの切り替え
           </div>

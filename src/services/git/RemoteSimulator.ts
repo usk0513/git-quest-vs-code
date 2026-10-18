@@ -1,5 +1,5 @@
-import { FileSystemService } from '../filesystem/FileSystemService';
-import { GitService } from './GitService';
+import type { FileSystemService } from '../filesystem/FileSystemService';
+import type { GitService } from './GitService';
 import { INITIAL_FILES, REMOTE_DIR } from '@/constants/initialFiles';
 
 export class RemoteSimulator {

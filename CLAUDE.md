@@ -13,6 +13,9 @@ Git Quest is an interactive web application for learning Git operations in the b
 npm install          # Install dependencies
 npm run dev          # Start dev server at http://localhost:5173
 
+# Lint
+npm run lint         # Biome (fails on any error or warning)
+
 # Testing
 npm run test         # Run tests in watch mode (Vitest)
 npm run test:coverage # Run tests with coverage

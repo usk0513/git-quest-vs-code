@@ -7,8 +7,14 @@ import { CommandParser } from '@/services/terminal/CommandParser';
 import { StepValidator } from '@/services/tutorial/StepValidator';
 import { getFileSystemService } from '@/services/filesystem/FileSystemService';
 import { resetTestFileSystem } from '../../../setup/testFileSystem';
-import { WORKSPACE_DIR } from '@/constants/initialFiles';
 import { TUTORIAL_STEPS } from '@/constants/tutorialSteps';
+import type { StepConfig } from '@/types';
+
+// Private fields the tests set to start from a given step.
+type TutorialServiceInternals = {
+  state: { currentStep: number; currentStage: string };
+  currentStepConfig: StepConfig;
+};
 
 describe('TutorialService git state tracking', () => {
   let service: TutorialService;
@@ -27,7 +33,7 @@ describe('TutorialService git state tracking', () => {
   });
 
   it('increments ahead count after committing and resets after push', async () => {
-    const internal = service as any;
+    const internal = service as unknown as TutorialServiceInternals;
     internal.state.currentStep = 1;
     internal.state.currentStage = 'terminal';
     internal.currentStepConfig = TUTORIAL_STEPS[1];
@@ -49,7 +55,7 @@ describe('TutorialService git state tracking', () => {
   });
 
   it('maintains ahead count per branch', async () => {
-    const internal = service as any;
+    const internal = service as unknown as TutorialServiceInternals;
     internal.state.currentStep = 1;
     internal.state.currentStage = 'terminal';
     internal.currentStepConfig = TUTORIAL_STEPS[1];
@@ -69,7 +75,7 @@ describe('TutorialService git state tracking', () => {
   });
 
   it('unstages files and moves them back to unstaged list', async () => {
-    const internal = service as any;
+    const internal = service as unknown as TutorialServiceInternals;
     internal.state.currentStep = 1;
     internal.state.currentStage = 'terminal';
     internal.currentStepConfig = TUTORIAL_STEPS[1];
