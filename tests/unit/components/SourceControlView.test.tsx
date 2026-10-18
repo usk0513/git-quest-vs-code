@@ -42,4 +42,32 @@ describe('SourceControlView', () => {
 
     expect(onUnstageFile).toHaveBeenCalledWith('greeting.txt');
   });
+
+  it('keeps the stage and unstage buttons visible on devices that cannot hover', () => {
+    const gitState: GitState = {
+      ...baseGitState,
+      unstagedFiles: [{ path: 'greeting.txt', status: 'modified' }],
+      stagedFiles: [{ path: 'README.md', status: 'modified' }],
+    };
+
+    render(
+      <SourceControlView
+        gitState={gitState}
+        onStageFile={vi.fn()}
+        onUnstageFile={vi.fn()}
+        onCommit={vi.fn()}
+        onPush={vi.fn()}
+      />
+    );
+
+    // group-hover only applies where the device can hover (see
+    // tests/unit/styles/tailwind.test.ts), so touch devices need hover-none.
+    for (const name of ['+', '-']) {
+      expect(screen.getByRole('button', { name })).toHaveClass(
+        'opacity-0',
+        'group-hover:opacity-100',
+        'hover-none:opacity-100'
+      );
+    }
+  });
 });

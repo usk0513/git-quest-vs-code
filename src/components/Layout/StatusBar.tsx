@@ -93,7 +93,7 @@ const BranchMenu: React.FC<{
         className="relative w-full flex justify-center pointer-events-none"
         style={{ paddingTop: '3.25rem' }}
       >
-        <div className="pointer-events-auto bg-vscode-bg border border-vscode-border rounded shadow-xl w-80 max-w-full overflow-hidden">
+        <div className="pointer-events-auto bg-vscode-bg border border-vscode-border rounded-sm shadow-xl w-80 max-w-full overflow-hidden">
           <div className="p-3 border-b border-vscode-border text-sm font-semibold text-vscode-text">
             ブランチの切り替え
           </div>
@@ -125,7 +125,7 @@ const BranchMenu: React.FC<{
                     setNewBranchName(e.target.value);
                     setError(null);
                   }}
-                  className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded focus:border-vscode-input-focus outline-none"
+                  className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded-sm focus:border-vscode-input-focus outline-hidden"
                 />
                 {error && <p className="mt-1 text-xs text-vscode-warning">{error}</p>}
                 <div className="flex justify-end gap-2 mt-2">

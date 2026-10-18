@@ -51,7 +51,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder={readOnly ? 'GUIステージでコミットできます' : 'コミットメッセージ'}
-              className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded focus:border-vscode-input-focus outline-none resize-none"
+              className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded-sm focus:border-vscode-input-focus outline-hidden resize-none"
               disabled={readOnly}
               rows={3}
             />
@@ -113,7 +113,9 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                     type="button"
                     onClick={readOnly ? undefined : () => onStageFile(file.path)}
                     className={`${
-                      readOnly ? 'opacity-40 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:bg-vscode-active'
+                      readOnly
+                        ? 'opacity-40 cursor-not-allowed'
+                        : 'opacity-0 group-hover:opacity-100 hover-none:opacity-100 hover:bg-vscode-active'
                     } text-vscode-accent px-2 py-1 rounded`}
                     disabled={readOnly}
                   >
@@ -149,7 +151,9 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
                     type="button"
                     onClick={readOnly ? undefined : () => onUnstageFile(file.path)}
                     className={`${
-                      readOnly ? 'opacity-40 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:bg-vscode-active'
+                      readOnly
+                        ? 'opacity-40 cursor-not-allowed'
+                        : 'opacity-0 group-hover:opacity-100 hover-none:opacity-100 hover:bg-vscode-active'
                     } text-vscode-text px-2 py-1 rounded`}
                     disabled={readOnly}
                   >

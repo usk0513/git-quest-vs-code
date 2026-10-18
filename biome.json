@@ -6,7 +6,11 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "*.config.{js,ts}"]
+    "includes": [
+      "src/**/*.{ts,tsx,css}",
+      "tests/**/*.{ts,tsx}",
+      "*.config.{js,ts}"
+    ]
   },
   "formatter": {
     "enabled": false
@@ -21,6 +25,11 @@
       "style": {
         "useComponentExportOnlyModules": "error"
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }

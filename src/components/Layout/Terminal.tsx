@@ -54,7 +54,7 @@ export const Terminal: React.FC<TerminalProps> = ({ output, onCommand }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent border-none outline-none font-mono text-sm text-vscode-text"
+          className="flex-1 bg-transparent border-none outline-hidden font-mono text-sm text-vscode-text"
           placeholder="Type a git command..."
           // biome-ignore lint/a11y/noAutofocus: the terminal prompt is the main input of the tutorial; focusing it on load lets learners type commands right away
           autoFocus

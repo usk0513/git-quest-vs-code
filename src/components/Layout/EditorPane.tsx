@@ -32,7 +32,7 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
         <textarea
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
-          className="w-full h-full p-4 bg-vscode-bg text-vscode-text font-mono text-sm resize-none border-none outline-none"
+          className="w-full h-full p-4 bg-vscode-bg text-vscode-text font-mono text-sm resize-none border-none outline-hidden"
           spellCheck={false}
         />
       </div>

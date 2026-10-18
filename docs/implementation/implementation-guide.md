@@ -36,7 +36,7 @@ npm install isomorphic-git @isomorphic-git/lightning-fs zustand
 npm install -D @types/react @types/react-dom
 npm install -D vitest @vitest/ui jsdom
 npm install -D @testing-library/react @testing-library/jest-dom @testing-library/user-event
-npm install -D tailwindcss postcss autoprefixer
+npm install -D tailwindcss @tailwindcss/vite   # Tailwind CSS 4（Vite プラグインで読み込む）
 npm install -D --save-exact @biomejs/biome   # リント（設定は biome.json）
 ```
 
@@ -64,10 +64,11 @@ npm install -D --save-exact @biomejs/biome   # リント（設定は biome.json�
 ```typescript
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -108,25 +109,28 @@ export default defineConfig({
 })
 ```
 
-#### tailwind.config.js
-```javascript
-export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        'vscode-bg': '#ffffff',
-        'vscode-sidebar': '#f3f3f3',
-        'vscode-border': '#e5e5e5',
-        'vscode-text': '#000000',
-        'vscode-text-muted': '#8c8c8c',
-        'vscode-accent': '#005fb8',
-        'vscode-button': '#0078d4',
-        'vscode-hover': '#e8e8e8',
-        // ... その他の色
-      },
-    },
-  },
+#### src/styles/index.css
+Tailwind CSS 4 では `tailwind.config.js` を使わず、テーマを CSS の `@theme` で定義します。
+```css
+@import 'tailwindcss';
+
+@theme {
+  --color-vscode-bg: #ffffff;
+  --color-vscode-sidebar: #f3f3f3;
+  --color-vscode-border: #e5e5e5;
+  --color-vscode-text: #000000;
+  --color-vscode-text-muted: #8c8c8c;
+  --color-vscode-accent: #005fb8;
+  --color-vscode-button: #0078d4;
+  --color-vscode-hover: #e8e8e8;
+  /* ... その他の色 */
+}
+
+/* 全体に効かせるスタイルは base レイヤーに書く（レイヤー外に書くとユーティリティより優先される） */
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
 }
 ```
 

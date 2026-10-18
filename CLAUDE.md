@@ -138,7 +138,11 @@ Check in order:
 
 ## Styling
 
-Uses Tailwind CSS with custom theme in `tailwind.config.js` matching VS Code Light Modern. Color variables are prefixed with `vscode-` (e.g., `bg-vscode-sidebar`).
+Uses Tailwind CSS 4, loaded through the `@tailwindcss/vite` plugin; there is no `tailwind.config.js` or `postcss.config.js`. The custom theme matching VS Code Light Modern is defined with `@theme` in `src/styles/index.css`. Color variables are prefixed with `vscode-` (e.g., `bg-vscode-sidebar`).
+
+Put global styles inside `@layer base` in `src/styles/index.css`. Tailwind 4 emits utilities into a native cascade layer, and unlayered rules beat every layered rule, so a global rule outside a layer would override utilities such as `p-4`. The same file keeps a few Tailwind 3 preflight defaults (border color, placeholder color, pointer cursor on buttons) so the UI looks as it did before the upgrade.
+
+Tailwind 4 applies `hover:` and `group-hover:` only inside `@media (hover: hover)`. A control that is hidden until hover (for example `opacity-0 group-hover:opacity-100`) must also get `hover-none:opacity-100` (a custom variant defined in `src/styles/index.css`), or touch devices never show it. `tests/unit/styles/tailwind.test.ts` compiles the stylesheet to check this, since jsdom cannot evaluate media queries.
 
 ## Critical Files to Understand
 
