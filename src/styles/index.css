@@ -1,28 +1,85 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@theme {
+  --color-vscode-bg: #ffffff;
+  --color-vscode-sidebar: #f3f3f3;
+  --color-vscode-border: #e5e5e5;
+  --color-vscode-text: #000000;
+  --color-vscode-text-secondary: #616161;
+  --color-vscode-text-muted: #8c8c8c;
+  --color-vscode-accent: #005fb8;
+  --color-vscode-accent-hover: #004c99;
+  --color-vscode-button: #0078d4;
+  --color-vscode-button-hover: #006cbe;
+  --color-vscode-hover: #e8e8e8;
+  --color-vscode-active: #e0e0e0;
+  --color-vscode-input-border: #cecece;
+  --color-vscode-input-focus: #005fb8;
+  --color-vscode-git-added: #587c0c;
+  --color-vscode-git-modified: #895503;
+  --color-vscode-git-deleted: #ad0707;
+  --color-vscode-git-staged-bg: #e8f5e9;
+  --color-vscode-success: #16825d;
+  --color-vscode-warning: #bf8803;
+  --color-vscode-error: #e51400;
+  --color-vscode-info: #0078d4;
+  --color-vscode-hint-bg: #fff9e6;
+
+  --shadow-vscode: 0 2px 8px rgba(0, 0, 0, 0.16);
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/*
+  Base styles live in the base layer. Tailwind 4 emits utilities into a
+  native cascade layer, and unlayered rules beat every layered rule, so a
+  global rule outside a layer would override utilities such as p-4 or m-2.
+*/
+@layer base {
+  /*
+    Tailwind 3 preflight defaults that Tailwind 4 changed, kept so the UI
+    looks and behaves as before. The colors are the Tailwind 3 values
+    (gray-200 and gray-400); the Tailwind 4 palette uses different OKLCH
+    values.
+  */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #e5e7eb;
+  }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+  }
 
-#root {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+
+  #root {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
 }

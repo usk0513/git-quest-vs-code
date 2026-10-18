@@ -51,7 +51,7 @@ export const SourceControlView: React.FC<SourceControlViewProps> = ({
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder={readOnly ? 'GUIステージでコミットできます' : 'コミットメッセージ'}
-              className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded focus:border-vscode-input-focus outline-none resize-none"
+              className="w-full px-2 py-1 text-sm bg-vscode-bg border border-vscode-input-border rounded-sm focus:border-vscode-input-focus outline-hidden resize-none"
               disabled={readOnly}
               rows={3}
             />

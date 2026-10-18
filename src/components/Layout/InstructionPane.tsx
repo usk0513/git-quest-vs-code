@@ -24,12 +24,12 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
             <img
               src={step.illustration.src}
               alt={step.illustration.alt}
-              className="w-full rounded border border-vscode-border"
+              className="w-full rounded-sm border border-vscode-border"
             />
           </div>
         )}
 
-        <div className="mb-6 p-4 bg-vscode-sidebar rounded border border-vscode-border">
+        <div className="mb-6 p-4 bg-vscode-sidebar rounded-sm border border-vscode-border">
           <h3 className="text-sm font-medium text-vscode-text mb-2">📘 説明</h3>
           <div className="text-sm text-vscode-text whitespace-pre-wrap">
             {step.detailedInstructions}
@@ -37,7 +37,7 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
         </div>
 
         {step.hints.length > 0 && (
-          <div className="mb-6 p-4 bg-vscode-hint-bg rounded border border-vscode-warning">
+          <div className="mb-6 p-4 bg-vscode-hint-bg rounded-sm border border-vscode-warning">
             <h3 className="text-sm font-medium text-vscode-text mb-2">💡 ヒント</h3>
             <ul className="text-sm text-vscode-text space-y-1">
               {step.hints.map((hint, index) => (
@@ -66,7 +66,7 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
         )}
 
         {step.stage === 'terminal' && (
-          <div className="p-4 bg-vscode-sidebar rounded border border-vscode-border">
+          <div className="p-4 bg-vscode-sidebar rounded-sm border border-vscode-border">
             <h3 className="text-sm font-medium text-vscode-text mb-2">
               ✅ 成功条件
             </h3>

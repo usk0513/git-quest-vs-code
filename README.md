@@ -155,7 +155,7 @@ Pull Request と `main` へのデプロイでは、`.github/workflows/ci.yml` �
 - **React 18** - UIライブラリ
 - **TypeScript** - 型安全な開発
 - **Vite** - 高速ビルドツール
-- **Tailwind CSS** - スタイリング（VS Code Light Modernテーマ）
+- **Tailwind CSS 4** - スタイリング（VS Code Light Modernテーマ。テーマは `src/styles/index.css` の `@theme` で定義）
 - **Zustand** - 状態管理
 
 ### Git実装
