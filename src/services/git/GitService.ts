@@ -266,7 +266,11 @@ export class GitService {
     for (const [path, headStatus, workdirStatus] of targets) {
       const oldSide = await this.getHeadBlob(dir, path, headStatus !== 0);
       const newSide = await this.getWorkingTreeBlob(dir, path, workdirStatus !== 0);
-      results.push(...this.createUnifiedDiff(path, oldSide, newSide));
+      // A loop, not push(...lines): a large file has more lines than a
+      // function call accepts as arguments.
+      for (const line of this.createUnifiedDiff(path, oldSide, newSide)) {
+        results.push(line);
+      }
     }
 
     return results.length > 0 ? results.join('\n') : 'No differences';
@@ -440,8 +444,14 @@ export class GitService {
         added.push(newLines[j++]);
       }
     }
-    removed.push(...oldLines.slice(i));
-    added.push(...newLines.slice(j));
+    // Loops, not push(...rest): the rest can be more lines than a function
+    // call accepts as arguments.
+    for (; i < m; i++) {
+      removed.push(oldLines[i]);
+    }
+    for (; j < n; j++) {
+      added.push(newLines[j]);
+    }
     flushChanges();
 
     // Number the lines once their final order is known.

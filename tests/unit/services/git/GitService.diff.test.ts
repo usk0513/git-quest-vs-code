@@ -276,6 +276,30 @@ describe('GitService.diff', () => {
     );
   });
 
+  // More lines than a function call accepts as arguments (V8 fails at
+  // roughly 10^5), so the diff must not spread the lines into a call.
+  const MANY_LINES = 150000;
+
+  it('handles a file that gains many lines', async () => {
+    const output = await diffAfterEdit('', `Hello, Git!\n${'x\n'.repeat(MANY_LINES)}`);
+    const outputLines = output.split('\n');
+
+    expect(outputLines[4]).toBe(`@@ -0,0 +1,${MANY_LINES + 1} @@`);
+    expect(outputLines[5]).toBe('+Hello, Git!');
+    expect(outputLines).toHaveLength(5 + MANY_LINES + 1);
+    expect(outputLines[outputLines.length - 1]).toBe('+x');
+  });
+
+  it('handles a file that loses many lines', async () => {
+    const output = await diffAfterEdit(`Hello, Git!\n${'x\n'.repeat(MANY_LINES)}`, '');
+    const outputLines = output.split('\n');
+
+    expect(outputLines[4]).toBe(`@@ -1,${MANY_LINES + 1} +0,0 @@`);
+    expect(outputLines[5]).toBe('-Hello, Git!');
+    expect(outputLines).toHaveLength(5 + MANY_LINES + 1);
+    expect(outputLines[outputLines.length - 1]).toBe('-x');
+  });
+
   it('limits the output to the requested file', async () => {
     const { fs, git } = await setUpRepo({ 'a.txt': 'keep\n', 'b.txt': 'x\ny\n' });
     await fs.writeFile(`${DIR}/a.txt`, 'keep2\n');
