@@ -102,7 +102,7 @@ describe('InstructionPane instructions', () => {
     const items = within(within(section).getByRole('list')).getAllByRole('listitem');
     expect(items.map((item) => item.textContent)).toEqual([
       '画面左下のブランチ名（main）をクリック',
-      '画面中央に表示されるメニューで「+ 新しいブランチの作成...」を選択',
+      '画面上部に表示されるメニューで「+ 新しいブランチの作成...」を選択',
       'ブランチ名を入力: feature/gui-test',
       '「作成」ボタンをクリック',
     ]);
@@ -136,7 +136,7 @@ describe('InstructionPane instructions', () => {
     const section = instructions(2);
 
     const paragraph = Array.from(section.querySelectorAll('p')).find((p) =>
-      p.textContent?.startsWith('エクスプローラービュー')
+      p.textContent?.startsWith('画面左端のエクスプローラーアイコン')
     );
     expect(paragraph?.querySelectorAll('br')).toHaveLength(1);
   });
