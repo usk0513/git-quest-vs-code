@@ -107,6 +107,7 @@ Takumi Guard が、そのパッケージを悪意あるものとしてブロッ�
 1. `.npmrc` から `registry=` の行を削除する
 2. `package-lock.json` の `resolved` にある `https://npm.flatt.tech/` を `https://registry.npmjs.org/` に置き換える（パスと `integrity` は同じなので、そのまま置き換えられます）
 3. `.github/dependabot.yml` から `registries` の設定を削除する
+4. `.github/workflows/ci.yml` の「Check npm configuration」で、`npm config get registry` の比較先を `https://registry.npmjs.org/` に変更する（変更しないと、CI がこの確認で失敗します。`min-release-age` の確認はそのまま残します）
 
 #### CI での確認
 
