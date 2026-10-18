@@ -76,4 +76,38 @@ describe('Tailwind styles', () => {
 
     expect(block.parents).toEqual(['@layer utilities', '@media (hover: hover)']);
   });
+
+  it('keeps every global rule inside a cascade layer so utilities still win', async () => {
+    // An unlayered rule such as `* { padding: 0 }` would override every
+    // layered utility, regardless of specificity.
+    const css = await buildCss(['p-4']);
+    const topLevel = parseBlocks(css)
+      .filter((b) => b.parents.length === 0)
+      .map((b) => b.prelude);
+
+    expect(topLevel).toContain('@layer base');
+    expect(topLevel).toContain('@layer utilities');
+    for (const prelude of topLevel) {
+      expect(prelude).toMatch(/^@(layer|property) /);
+    }
+  });
+
+  it('keeps the Tailwind 3 defaults for borders, placeholders and button cursors', async () => {
+    const css = await buildCss([]);
+    const base = parseBlocks(css).filter((b) => b.parents[0] === '@layer base');
+    // Preflight uses some of the same selectors, so read every matching rule.
+    const bodyOf = (prelude: string) =>
+      base
+        .filter((b) => b.prelude === prelude)
+        .map((b) => b.body)
+        .join('\n');
+
+    expect(bodyOf('*, ::after, ::before, ::backdrop, ::file-selector-button')).toContain(
+      'border-color: #e5e7eb'
+    );
+    expect(bodyOf('input::placeholder, textarea::placeholder')).toContain('color: #9ca3af');
+    expect(bodyOf("button:not(:disabled), [role='button']:not(:disabled)")).toContain(
+      'cursor: pointer'
+    );
+  });
 });
