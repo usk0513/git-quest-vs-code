@@ -77,6 +77,16 @@ describe('Tailwind styles', () => {
     expect(block.parents).toEqual(['@layer utilities', '@media (hover: hover)']);
   });
 
+  it('applies focus-visible: on every device, outside any hover media query', async () => {
+    // Controls revealed by group-hover use it to stay visible while they
+    // have keyboard focus.
+    const css = await buildCss(['focus-visible:opacity-100']);
+    const block = findBlock(css, '.focus-visible\\:opacity-100:focus-visible');
+
+    expect(block.parents).toEqual(['@layer utilities']);
+    expect(block.body).toContain('opacity: 100%');
+  });
+
   it('keeps every global rule inside a cascade layer so utilities still win', async () => {
     // An unlayered rule such as `* { padding: 0 }` would override every
     // layered utility, regardless of specificity.
