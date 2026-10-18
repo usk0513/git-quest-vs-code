@@ -1,0 +1,19 @@
+version: 2
+
+# Dependabot jobs can only reach hosts declared here; a registry set only in
+# .npmrc is blocked. Takumi Guard needs no credentials.
+registries:
+  takumi-guard:
+    type: npm-registry
+    url: https://npm.flatt.tech
+    replaces-base: true
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    registries:
+      - takumi-guard
+    schedule:
+      interval: weekly
+    # Security updates only. A limit of 0 disables version updates.
+    open-pull-requests-limit: 0

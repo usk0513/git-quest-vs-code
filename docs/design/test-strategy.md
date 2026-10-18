@@ -512,25 +512,33 @@ test.describe('Git Quest Tutorial', () => {
 
 ### 6.1 CI/CD統合
 
-```yaml
-# .github/workflows/test.yml
-name: Tests
+検証は `.github/workflows/ci.yml`（再利用可能なワークフロー）にまとめています。
 
-on: [push, pull_request]
+- **Pull Request**：`pull_request` で `ci.yml` が直接実行されます。同じ PR に新しい push があると、古い実行はキャンセルされます。
+- **`main` への push**：`.github/workflows/deploy.yml` が `verify`（`ci.yml` を呼び出す）→ `build` → `deploy` の順に実行します。同じコミット（SHA）の検証が成功したときだけ GitHub Pages に公開されます。
+
+`ci.yml` の主な手順は次のとおりです。
+
+```yaml
+# .github/workflows/ci.yml（抜粋）
+on:
+  pull_request:
+  workflow_call:
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: '18'
+          node-version: 24
+          cache: npm
       - run: npm ci
-      - run: npm run test:unit        # ユニット・統合テスト
-      - run: npm run test:coverage    # カバレッジ取得
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
+      - run: npm run build
+      - run: npm run test:coverage                # カバレッジ付きテスト
+      - run: npm audit --omit=dev                 # 本番依存の既知脆弱性
+      - run: npm audit signatures --registry=https://registry.npmjs.org/
 ```
 
 ### 6.2 テスト実行コマンド
