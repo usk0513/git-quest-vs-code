@@ -89,11 +89,24 @@ export const useAppStore = create<AppState>((set, get) => {
   // prints its result first, and two operations change the repository at
   // the same time. Queued operations must not queue another one: that would
   // wait for itself.
+  //
+  // Each tutorial service that initialize() installs (also on reset) starts
+  // a new session with an empty queue. Operations requested in an earlier
+  // session are dropped (they resolve to undefined) instead of running
+  // against the new tutorial.
+  let session = 0;
   let operationQueue: Promise<unknown> = Promise.resolve();
-  const runInOrder = <T>(operation: () => Promise<T>): Promise<T> => {
-    const result = operationQueue.then(operation);
+  const runInOrder = <T>(operation: () => Promise<T>): Promise<T | undefined> => {
+    const requestedSession = session;
+    const result = operationQueue.then(() =>
+      requestedSession === session ? operation() : undefined
+    );
     operationQueue = result.catch(() => undefined);
     return result;
+  };
+  const startSession = () => {
+    session += 1;
+    operationQueue = Promise.resolve();
   };
 
   // Runs a GUI operation as its git command and prints the result once.
@@ -183,6 +196,7 @@ export const useAppStore = create<AppState>((set, get) => {
       const currentStep = tutorialService.getCurrentStep();
       const tutorialState = tutorialService.getState();
 
+      startSession();
       set({
         tutorialService,
         currentStep,
@@ -489,8 +503,8 @@ export const useAppStore = create<AppState>((set, get) => {
       }
     }),
 
-  createBranch: (branch: string) =>
-    runInOrder(async () => {
+  createBranch: async (branch: string) =>
+    (await runInOrder(async () => {
       const trimmed = branch.trim();
 
       if (!get().tutorialService || trimmed !== GUI_BRANCH) {
@@ -499,6 +513,6 @@ export const useAppStore = create<AppState>((set, get) => {
 
       const result = await runGuiCommand('create-branch', `git checkout -b ${trimmed}`);
       return result?.success ?? false;
-    }),
+    })) ?? false,
   };
 });

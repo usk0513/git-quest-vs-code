@@ -71,6 +71,7 @@ All application state lives in `useAppStore.ts`. **Critical pattern**: GUI actio
 **Operation order**: terminal commands, GUI actions and the edit check (`validateCurrentStep`) run one at a time through `runInOrder()`, in the order they were requested.
 - Each operation prints its output when it runs, so a command line always sits right above its own output.
 - A check is dropped if an earlier operation already completed the step it was requested for. Otherwise it would check the following step and print that step's success message before the learner did anything there.
+- `initialize()` (also run by `reset()`) starts a new session with an empty queue. Operations queued for the previous tutorial service are dropped, not run against the new one.
 - Code that runs inside `runInOrder()` must call the unqueued helpers (such as `runGuiCommand()`), never another queued action: that would wait for itself.
 - `editFile` is not queued, so typing in the editor stays immediate.
 

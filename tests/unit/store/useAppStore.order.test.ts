@@ -102,4 +102,40 @@ describe('useAppStore operation order', () => {
     expect(output).not.toContain(`✓ ${findStep(32).successMessage}`);
     expect(useAppStore.getState().currentStep?.id).toBe(32);
   });
+
+  it('drops operations queued before a reset instead of running them in the new tutorial', async () => {
+    const store = useAppStore.getState();
+    await store.nextStep();
+    await store.executeCommand('git clone /remote-repo');
+    expect(useAppStore.getState().currentStep?.id).toBe(2);
+
+    // Hold `git status` while it runs, so the clone requested next waits in
+    // the queue across the reset.
+    const oldService = useAppStore.getState().tutorialService as TutorialService;
+    const executeCommand = oldService.executeCommand.bind(oldService);
+    let releaseStatus!: () => void;
+    const statusGate = new Promise<void>((resolve) => {
+      releaseStatus = resolve;
+    });
+    oldService.executeCommand = async (...args) => {
+      await statusGate;
+      return executeCommand(...args);
+    };
+
+    const status = store.executeCommand('git status');
+    const queuedClone = store.executeCommand('git clone /remote-repo');
+
+    await useAppStore.getState().reset();
+    await useAppStore.getState().nextStep();
+    const newService = useAppStore.getState().tutorialService as TutorialService;
+    expect(newService).not.toBe(oldService);
+
+    releaseStatus();
+    await Promise.all([status, queuedClone]);
+
+    // The new tutorial is still waiting for its own clone at step 1.
+    expect(newService.getCurrentStep().id).toBe(1);
+    expect(await newService.getFileList()).toEqual([]);
+    expect(useAppStore.getState().terminalOutput).not.toContain('$ git clone /remote-repo');
+  });
 });
