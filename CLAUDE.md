@@ -62,15 +62,18 @@ The step IDs jump from 6 to 21 intentionally - this allows future insertion of i
 
 ### State Management (Zustand)
 
-All application state lives in `useAppStore.ts`. **Critical pattern**: GUI actions (like clicking "stage file" button) internally call `executeCommand()` with the equivalent Git command. This ensures both terminal and GUI paths go through the same validation and execution pipeline.
+All application state lives in `useAppStore.ts`. **Critical pattern**: GUI actions (like clicking "stage file" button) go through `runGuiAction()`. It calls `TutorialService.performGuiAction()`, which runs the equivalent Git command through `executeCommand()`, but only if the current step lists the action in `allowedGuiActions`. Otherwise it returns an error with a hint. Both terminal and GUI paths therefore share the same execution and step-completion pipeline. Each step completion prints its success message exactly once; do not call `validateCurrentStep()` again after a GUI action.
 
 Example:
 ```typescript
 // GUI button click
 stageFile: async (filepath: string) => {
-  await tutorialService.executeCommand(`git add ${filepath}`);
+  if (!get().requireGuiBranch()) return;
+  await get().runGuiAction('stage-file', `git add ${filepath}`);
 }
 ```
+
+Steps that require a push pass only while the current branch HEAD matches the commit recorded at its last push (`TutorialService.pushedHeads`), not merely because the branch was pushed before.
 
 ### Step Definition Structure
 

@@ -133,7 +133,11 @@ function App() {
         behindCount={gitState.behindCount}
         onSwitchBranch={switchBranch}
         onCreateBranch={handleCreateBranch}
-        canCreateBranch={currentStep.stage === 'gui' && gitState.currentBranch === 'main'}
+        canCreateBranch={
+          currentStep.stage === 'gui' &&
+          (currentStep.allowedGuiActions?.includes('create-branch') ?? false) &&
+          gitState.currentBranch === 'main'
+        }
         menuEnabled={currentStep.stage === 'gui'}
       />
     </div>

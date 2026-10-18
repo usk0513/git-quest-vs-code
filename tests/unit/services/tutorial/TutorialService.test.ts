@@ -5,7 +5,8 @@ import { GitValidator } from '@/services/git/GitValidator';
 import { RemoteSimulator } from '@/services/git/RemoteSimulator';
 import { CommandParser } from '@/services/terminal/CommandParser';
 import { StepValidator } from '@/services/tutorial/StepValidator';
-import { getFileSystemService, resetFileSystem } from '@/services/filesystem/FileSystemService';
+import { getFileSystemService } from '@/services/filesystem/FileSystemService';
+import { resetTestFileSystem } from '../../../setup/testFileSystem';
 import { WORKSPACE_DIR } from '@/constants/initialFiles';
 import { TUTORIAL_STEPS } from '@/constants/tutorialSteps';
 
@@ -13,7 +14,7 @@ describe('TutorialService git state tracking', () => {
   let service: TutorialService;
 
   beforeEach(async () => {
-    resetFileSystem();
+    resetTestFileSystem();
     const fs = getFileSystemService();
     const git = new GitService(fs);
     const validator = new GitValidator();

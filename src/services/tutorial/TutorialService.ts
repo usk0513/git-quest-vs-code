@@ -1,4 +1,10 @@
-import { CommandExecutionResult, TutorialState, StepConfig, ValidationResult } from '@/types';
+import {
+  CommandExecutionResult,
+  GuiAction,
+  TutorialState,
+  StepConfig,
+  ValidationResult,
+} from '@/types';
 import { FileSystemService } from '../filesystem/FileSystemService';
 import { GitService } from '../git/GitService';
 import { GitValidator } from '../git/GitValidator';
@@ -7,6 +13,16 @@ import { CommandParser } from '../terminal/CommandParser';
 import { StepValidator } from './StepValidator';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
 import { WORKSPACE_DIR } from '@/constants/initialFiles';
+
+const GUI_ACTION_LABELS: Record<GuiAction, string> = {
+  'stage-file': 'ステージング',
+  'unstage-file': 'ステージの取り消し',
+  commit: 'コミット',
+  push: 'プッシュ',
+  'create-branch': 'ブランチの作成',
+  'switch-branch': 'ブランチの切り替え',
+  'edit-file': 'ファイルの編集',
+};
 
 export class TutorialService {
   private fs: FileSystemService;
@@ -17,7 +33,9 @@ export class TutorialService {
   private parser: CommandParser;
   private state: TutorialState;
   private currentStepConfig: StepConfig;
-  private pushedBranches: Set<string> = new Set();
+  // Commit oid of each branch at its last push. A step that requires a push
+  // passes only while the branch HEAD still matches this oid.
+  private pushedHeads: Map<string, string> = new Map();
   private unpushedCommits: Map<string, number> = new Map();
 
   private isAutoAdvance(step: StepConfig): boolean {
@@ -53,7 +71,7 @@ export class TutorialService {
       // Create remote repository
       await this.remoteSimulator.createRemoteRepository();
       this.unpushedCommits.clear();
-      this.pushedBranches.clear();
+      this.pushedHeads.clear();
       console.log('Tutorial initialized');
     } catch (error) {
       console.error('Error initializing tutorial:', error);
@@ -65,6 +83,10 @@ export class TutorialService {
     commandString: string,
     options: { skipValidation?: boolean } = {}
   ): Promise<CommandExecutionResult> {
+    // The step this command was issued for. Captured before any await so a
+    // check that finishes while the command runs cannot change it.
+    const stepAtStart = this.currentStepConfig;
+
     try {
       // Step 0 doesn't allow commands
       if (this.state.currentStep === 0) {
@@ -106,7 +128,7 @@ export class TutorialService {
       let validationResult: ValidationResult | null = null;
       if (result.success) {
         // Check if step is completed
-        validationResult = await this.checkStepCompletion();
+        validationResult = await this.checkStepCompletion(stepAtStart);
       }
 
       return {
@@ -315,7 +337,7 @@ export class TutorialService {
       const success = await this.remoteSimulator.simulatePush(WORKSPACE_DIR, branch);
 
       if (success) {
-        this.pushedBranches.add(branch);
+        this.pushedHeads.set(branch, await this.git.resolveRef(WORKSPACE_DIR, branch));
         this.unpushedCommits.set(branch, 0);
         return {
           success: true,
@@ -414,20 +436,25 @@ export class TutorialService {
     }
   }
 
-  private async checkStepCompletion(): Promise<ValidationResult> {
+  // checkedStep is the step the caller wants to complete. It must be taken
+  // before the first await: advanceStep() replaces currentStepConfig, and the
+  // success message must come from the step that was completed.
+  private async checkStepCompletion(
+    checkedStep: StepConfig = this.currentStepConfig
+  ): Promise<ValidationResult> {
     const gitState = await this.git.getGitState(WORKSPACE_DIR);
 
-    // For push validation, check if branch was pushed
-    const rules = this.currentStepConfig.validationRules.map((rule) => {
-      if (rule.type === 'pushed') {
-        const currentBranch = gitState.currentBranch;
-        return {
-          ...rule,
-          expectedValue: this.pushedBranches.has(currentBranch),
-        };
-      }
-      return rule;
-    });
+    const rules = await Promise.all(
+      checkedStep.validationRules.map(async (rule) => {
+        if (rule.type === 'pushed') {
+          return {
+            ...rule,
+            expectedValue: await this.isHeadPushed(gitState.currentBranch),
+          };
+        }
+        return rule;
+      })
+    );
 
     const validation = await this.stepValidator.validateStep(
       rules,
@@ -435,18 +462,68 @@ export class TutorialService {
       WORKSPACE_DIR
     );
 
+    // Checks can overlap (e.g. a validate button pressed twice). If another
+    // check already moved past checkedStep, applying this result would
+    // advance the following step as well, so discard it.
+    if (this.currentStepConfig !== checkedStep) {
+      return { passed: false, message: '', superseded: true };
+    }
+
     if (!validation.passed) {
       return validation;
     }
 
-    if (this.isAutoAdvance(this.currentStepConfig)) {
+    if (this.isAutoAdvance(checkedStep)) {
       this.advanceStep();
     }
 
     return {
       passed: true,
-      message: this.currentStepConfig.successMessage || validation.message,
+      message: checkedStep.successMessage || validation.message,
     };
+  }
+
+  private async isHeadPushed(branch: string): Promise<boolean> {
+    const pushedOid = this.pushedHeads.get(branch);
+    if (!pushedOid) {
+      return false;
+    }
+    try {
+      return (await this.git.resolveRef(WORKSPACE_DIR, branch)) === pushedOid;
+    } catch {
+      return false;
+    }
+  }
+
+  isGuiActionAllowed(action: GuiAction): boolean {
+    return this.currentStepConfig.allowedGuiActions?.includes(action) ?? false;
+  }
+
+  // Returns an error result when the current step does not allow the action,
+  // or null when it may proceed.
+  checkGuiAction(action: GuiAction): CommandExecutionResult | null {
+    if (this.isGuiActionAllowed(action)) {
+      return null;
+    }
+    return {
+      success: false,
+      output: '',
+      error: `このステップでは「${GUI_ACTION_LABELS[action]}」はできません。`,
+      hint: this.currentStepConfig.hints[0] ?? '右側の説明に沿って操作してください',
+    };
+  }
+
+  // GUI operations run the equivalent git command, but only the actions that
+  // the current step lists in allowedGuiActions.
+  async performGuiAction(
+    action: GuiAction,
+    commandString: string
+  ): Promise<CommandExecutionResult> {
+    const denied = this.checkGuiAction(action);
+    if (denied) {
+      return denied;
+    }
+    return await this.executeCommand(commandString, { skipValidation: true });
   }
 
   async validateCurrentStep(): Promise<ValidationResult> {
@@ -517,7 +594,7 @@ export class TutorialService {
       guiStageCompleted: false,
     };
     this.currentStepConfig = TUTORIAL_STEPS[0];
-    this.pushedBranches.clear();
+    this.pushedHeads.clear();
     this.unpushedCommits.clear();
 
     // Reinitialize remote repository
@@ -527,7 +604,7 @@ export class TutorialService {
   async getGitState() {
     const gitState = await this.git.getGitState(WORKSPACE_DIR);
     const remoteBranches = new Set<string>(['origin/main']);
-    this.pushedBranches.forEach((branch) => {
+    this.pushedHeads.forEach((_oid, branch) => {
       remoteBranches.add(`origin/${branch}`);
     });
     const aheadCount = this.unpushedCommits.get(gitState.currentBranch) ?? 0;
