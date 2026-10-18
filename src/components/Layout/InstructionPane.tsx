@@ -1,6 +1,7 @@
 import type React from 'react';
 import type { StepConfig } from '@/types';
 import { Button } from '../Common/Button';
+import { InlineText, InstructionText } from './InstructionText';
 
 interface InstructionPaneProps {
   step: StepConfig;
@@ -44,9 +45,7 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
 
           <div className="mb-6 p-4 bg-vscode-sidebar rounded-sm border border-vscode-border">
             <h3 className="text-sm font-medium text-vscode-text mb-2">📘 説明</h3>
-            <div className="text-sm text-vscode-text whitespace-pre-wrap">
-              {step.detailedInstructions}
-            </div>
+            <InstructionText text={step.detailedInstructions} />
           </div>
 
           {step.hints.length > 0 && (
@@ -56,7 +55,9 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
                 {step.hints.map((hint, index) => (
                   // Hints are static display text for the current step.
                   // biome-ignore lint/suspicious/noArrayIndexKey: static display-only list, see above
-                  <li key={index}>• {hint}</li>
+                  <li key={index}>
+                    • <InlineText text={hint} />
+                  </li>
                 ))}
               </ul>
             </div>
