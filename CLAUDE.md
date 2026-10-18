@@ -66,15 +66,23 @@ The step IDs jump from 6 to 21 intentionally - this allows future insertion of i
 
 ### State Management (Zustand)
 
-All application state lives in `useAppStore.ts`. **Critical pattern**: GUI actions (like clicking "stage file" button) go through `runGuiAction()`. It calls `TutorialService.performGuiAction()`, which runs the equivalent Git command through `executeCommand()`, but only if the current step lists the action in `allowedGuiActions`. Otherwise it returns an error with a hint. Both terminal and GUI paths therefore share the same execution and step-completion pipeline. Each step completion prints its success message exactly once; do not call `validateCurrentStep()` again after a GUI action.
+All application state lives in `useAppStore.ts`. **Critical pattern**: GUI actions (like clicking "stage file" button) go through `runGuiCommand()`. It calls `TutorialService.performGuiAction()`, which runs the equivalent Git command through `executeCommand()`, but only if the current step lists the action in `allowedGuiActions`. Otherwise it returns an error with a hint. Both terminal and GUI paths therefore share the same execution and step-completion pipeline. Each step completion prints its success message exactly once; do not call `validateCurrentStep()` again after a GUI action.
+
+**Operation order**: terminal commands, GUI actions and the edit check (`validateCurrentStep`) run one at a time through `runInOrder()`, in the order they were requested.
+- Each operation prints its output when it runs, so a command line always sits right above its own output.
+- A check is dropped if an earlier operation already completed the step it was requested for. Otherwise it would check the following step and print that step's success message before the learner did anything there.
+- `initialize()` (also run by `reset()`) starts a new session with an empty queue. Operations queued for the previous tutorial service are dropped, not run against the new one.
+- Code that runs inside `runInOrder()` must call the unqueued helpers (such as `runGuiCommand()`), never another queued action: that would wait for itself.
+- `editFile` is not queued, so typing in the editor stays immediate.
 
 Example:
 ```typescript
 // GUI button click
-stageFile: async (filepath: string) => {
-  if (!get().requireGuiBranch()) return;
-  await get().runGuiAction('stage-file', `git add ${filepath}`);
-}
+stageFile: (filepath: string) =>
+  runInOrder(async () => {
+    if (!get().requireGuiBranch()) return;
+    await runGuiCommand('stage-file', `git add ${filepath}`);
+  }),
 ```
 
 Steps that require a push pass only while the current branch HEAD matches the commit recorded at its last push (`TutorialService.pushedHeads`), not merely because the branch was pushed before.

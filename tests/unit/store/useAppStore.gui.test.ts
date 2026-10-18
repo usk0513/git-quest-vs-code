@@ -112,41 +112,48 @@ describe('useAppStore GUI actions', () => {
     expect(useAppStore.getState().currentStep?.id).toBe(32);
     const output = useAppStore.getState().terminalOutput;
     expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
+    // Step 32 has no rules and does not advance on its own, so a second check
+    // of it would only show up as its success message.
+    expect(output).not.toContain(`✓ ${findStep(32).successMessage}`);
   });
 
-  it('prints the edit success once even when the second check reads git state late', async () => {
+  it('prints the edit success once when a second check is requested while the first is still running', async () => {
     await walkToGuiEditStepWithEdit();
     const store = useAppStore.getState();
     const tutorialService = store.tutorialService as TutorialService;
 
-    // Hold back the second git state read until the first check has
-    // completed step 31, so the second check resumes after the step changed.
+    // Hold back the first check's git state read, and request the second
+    // check while it is held. Checks run one at a time, so the second one
+    // waits and must then be dropped because step 31 is already complete.
+    // (TutorialServiceGuiActions.test.ts covers checks that overlap inside
+    // the service itself.)
     const git = (tutorialService as unknown as { git: GitService }).git;
     const readGitState = git.getGitState.bind(git);
-    let releaseSecondRead!: () => void;
-    const secondReadGate = new Promise<void>((resolve) => {
-      releaseSecondRead = resolve;
+    let releaseFirstRead!: () => void;
+    const firstReadGate = new Promise<void>((resolve) => {
+      releaseFirstRead = resolve;
     });
     let reads = 0;
     git.getGitState = async (dir: string) => {
       const readNumber = ++reads;
       const state = await readGitState(dir);
-      if (readNumber === 2) {
-        await secondReadGate;
+      if (readNumber === 1) {
+        await firstReadGate;
       }
       return state;
     };
 
     const firstCheck = store.validateCurrentStep();
     const secondCheck = store.validateCurrentStep();
-    await firstCheck;
-    expect(useAppStore.getState().currentStep?.id).toBe(32);
-    releaseSecondRead();
-    await secondCheck;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(useAppStore.getState().currentStep?.id).toBe(31);
+    releaseFirstRead();
+    await Promise.all([firstCheck, secondCheck]);
 
     expect(useAppStore.getState().currentStep?.id).toBe(32);
     const output = useAppStore.getState().terminalOutput;
     expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
+    expect(output).not.toContain(`✓ ${findStep(32).successMessage}`);
   });
 
   it('refuses a push before staging and stays on the staging step', async () => {
