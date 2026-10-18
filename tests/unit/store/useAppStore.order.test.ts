@@ -90,13 +90,16 @@ describe('useAppStore operation order', () => {
     const store = useAppStore.getState();
 
     // The edit check for step 31 is pressed twice. The first check completes
-    // step 31; the second must not check the confirmation step 32, which
-    // would skip it.
+    // step 31; the second must not check step 32. Step 32 has no rules, so
+    // that check would pass and print its success message before the learner
+    // has looked at the change. (It does not advance on its own, so the step
+    // number alone cannot catch this.)
     await store.editFile('greeting.txt', 'Hello, Git Quest!');
     await Promise.all([store.validateCurrentStep(), store.validateCurrentStep()]);
 
     const output = useAppStore.getState().terminalOutput;
     expect(output.filter((line) => line === `✓ ${findStep(31).successMessage}`)).toHaveLength(1);
+    expect(output).not.toContain(`✓ ${findStep(32).successMessage}`);
     expect(useAppStore.getState().currentStep?.id).toBe(32);
   });
 });

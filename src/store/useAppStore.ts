@@ -422,8 +422,10 @@ export const useAppStore = create<AppState>((set, get) => {
 
   validateCurrentStep: () => {
     // The check is for the step on screen when it was requested. If an
-    // operation queued before it has already completed that step, checking
-    // the next step instead could skip a confirmation step, so drop it. The
+    // operation queued before it has already completed that step, drop it:
+    // checking the following step instead would print that step's success
+    // message before the learner has done it (for example step 32, which has
+    // no rules), and would complete it if it advanced automatically. The
     // operation that completed the step has already printed its message.
     const requestedStep = get().tutorialService?.getCurrentStep();
 

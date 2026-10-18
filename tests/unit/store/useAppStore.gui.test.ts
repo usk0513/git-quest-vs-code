@@ -112,6 +112,9 @@ describe('useAppStore GUI actions', () => {
     expect(useAppStore.getState().currentStep?.id).toBe(32);
     const output = useAppStore.getState().terminalOutput;
     expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
+    // Step 32 has no rules and does not advance on its own, so a second check
+    // of it would only show up as its success message.
+    expect(output).not.toContain(`✓ ${findStep(32).successMessage}`);
   });
 
   it('prints the edit success once when a second check is requested while the first is still running', async () => {
@@ -150,6 +153,7 @@ describe('useAppStore GUI actions', () => {
     expect(useAppStore.getState().currentStep?.id).toBe(32);
     const output = useAppStore.getState().terminalOutput;
     expect(countLines(output, `✓ ${findStep(31).successMessage}`)).toBe(1);
+    expect(output).not.toContain(`✓ ${findStep(32).successMessage}`);
   });
 
   it('refuses a push before staging and stays on the staging step', async () => {
