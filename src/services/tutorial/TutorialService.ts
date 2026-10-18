@@ -1,6 +1,7 @@
 import type {
   CommandExecutionResult,
   GuiAction,
+  ParsedGitCommand,
   TutorialState,
   StepConfig,
   ValidationResult,
@@ -13,6 +14,7 @@ import type { CommandParser } from '../terminal/CommandParser';
 import type { StepValidator } from './StepValidator';
 import { TUTORIAL_STEPS, GUI_TUTORIAL_STEPS } from '@/constants/tutorialSteps';
 import { WORKSPACE_DIR } from '@/constants/initialFiles';
+import { getErrorMessage } from '@/utils/errors';
 
 const GUI_ACTION_LABELS: Record<GuiAction, string> = {
   'stage-file': 'ステージング',
@@ -136,16 +138,16 @@ export class TutorialService {
         stepCompleted: validationResult?.passed ?? false,
         validationResult: validationResult ?? undefined,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message || 'Command execution failed',
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async executeGitCommand(parsed: any): Promise<CommandExecutionResult> {
+  private async executeGitCommand(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
       switch (parsed.command) {
         case 'clone':
@@ -182,11 +184,11 @@ export class TutorialService {
             error: `Command ${parsed.command} is not yet implemented`,
           };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message || 'Command execution failed',
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
@@ -210,18 +212,26 @@ export class TutorialService {
         success: true,
         output: `Cloning into '${WORKSPACE_DIR}'...\nDone.`,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async handleCheckout(parsed: any): Promise<CommandExecutionResult> {
+  private async handleCheckout(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
-      const branchName = parsed.branchName!;
+      const branchName = parsed.branchName;
+      if (!branchName) {
+        return {
+          success: false,
+          output: '',
+          error: 'Branch name is required',
+          hint: 'Example: git checkout -b feature/add-greeting',
+        };
+      }
 
       if (parsed.flags.includes('-b')) {
         // Create and checkout new branch
@@ -238,16 +248,16 @@ export class TutorialService {
           output: `Switched to branch '${branchName}'`,
         };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async handleBranch(parsed: any): Promise<CommandExecutionResult> {
+  private async handleBranch(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
       if (parsed.args.length === 0) {
         // List branches
@@ -269,16 +279,16 @@ export class TutorialService {
           output: `Branch '${branchName}' created`,
         };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async handleAdd(parsed: any): Promise<CommandExecutionResult> {
+  private async handleAdd(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
       const filepath = parsed.args[0];
 
@@ -300,18 +310,26 @@ export class TutorialService {
           output: `Added '${filepath}' to staging area`,
         };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async handleCommit(parsed: any): Promise<CommandExecutionResult> {
+  private async handleCommit(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
-      const message = parsed.message!;
+      const message = parsed.message;
+      if (!message) {
+        return {
+          success: false,
+          output: '',
+          error: 'Commit message is required',
+          hint: 'Example: git commit -m "Add greeting message"',
+        };
+      }
       const sha = await this.git.commit(WORKSPACE_DIR, message);
       const branch = await this.git.currentBranch(WORKSPACE_DIR);
       const pending = this.unpushedCommits.get(branch) ?? 0;
@@ -320,16 +338,16 @@ export class TutorialService {
         success: true,
         output: `[${await this.git.currentBranch(WORKSPACE_DIR)} ${sha.substring(0, 7)}] ${message}`,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async handlePush(parsed: any): Promise<CommandExecutionResult> {
+  private async handlePush(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
       const remote = parsed.args[0]; // e.g., 'origin'
       const branch = parsed.args[1]; // e.g., 'main'
@@ -350,11 +368,11 @@ export class TutorialService {
           error: 'Push failed',
         };
       }
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
@@ -387,11 +405,11 @@ export class TutorialService {
         success: true,
         output,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
@@ -410,16 +428,16 @@ export class TutorialService {
         success: true,
         output: output || 'No commits yet',
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message,
+        error: getErrorMessage(error, 'Command execution failed'),
       };
     }
   }
 
-  private async handleDiff(parsed: any): Promise<CommandExecutionResult> {
+  private async handleDiff(parsed: ParsedGitCommand): Promise<CommandExecutionResult> {
     try {
       const filepath = parsed.args[0];
       const diffOutput = await this.git.diff(WORKSPACE_DIR, filepath);
@@ -427,11 +445,11 @@ export class TutorialService {
         success: true,
         output: diffOutput,
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         success: false,
         output: '',
-        error: error.message || 'Failed to generate diff',
+        error: getErrorMessage(error, 'Failed to generate diff'),
       };
     }
   }

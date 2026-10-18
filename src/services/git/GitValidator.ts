@@ -1,5 +1,6 @@
-import type { GitCommand, ValidationResult } from '@/types';
+import type { GitCommand, ParsedGitCommand, ValidationResult } from '@/types';
 import { CommandParser } from '../terminal/CommandParser';
+import { getErrorMessage } from '@/utils/errors';
 
 interface CommandValidationOptions {
   allowBranchCreation?: boolean;
@@ -58,17 +59,17 @@ export class GitValidator {
         passed: true,
         message: 'Command is valid',
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         passed: false,
-        message: error.message || 'Invalid command',
+        message: getErrorMessage(error, 'Invalid command'),
         hint: 'Check your command syntax',
       };
     }
   }
 
   private validateSpecificCommand(
-    parsed: any,
+    parsed: ParsedGitCommand,
     options: CommandValidationOptions
   ): ValidationResult {
     const allowedBranchNames = ['feature/add-greeting'];
