@@ -13,15 +13,16 @@ Git Quest is an interactive web application for learning Git operations in the b
 npm install          # Install dependencies
 npm run dev          # Start dev server at http://localhost:5173
 
-# Lint
+# Lint and type check
 npm run lint         # Biome (fails on any error or warning)
+npm run typecheck    # tsc -b: app, Vite/Vitest config files, and tests
 
 # Testing
 npm run test         # Run tests in watch mode (Vitest)
 npm run test:coverage # Run tests with coverage
 
 # Build
-npm run build        # Build for production (TypeScript + Vite)
+npm run build        # Type check (tsc -b), then build for production with Vite
 npm run preview      # Preview production build
 ```
 
@@ -135,6 +136,10 @@ Check in order:
 - Service tests should mock `FileSystemService` and `GitService`
 - Component tests use React Testing Library
 - Test command validation separately from command execution
+- Tests are type-checked too. `tsconfig.json` only references three projects, and `tsc -b` checks all of them:
+  - `tsconfig.app.json`: `src`, browser types only (`types: []`, so Node globals are errors)
+  - `tsconfig.node.json`: `vite.config.ts` and `vitest.config.ts`, with Node types
+  - `tsconfig.test.json`: `src` and `tests`, with Node types. The jest-dom matcher types come from `@testing-library/jest-dom/vitest`, imported in `tests/setup/vitest.setup.ts`.
 
 ## Styling
 
