@@ -79,11 +79,63 @@ interface AppState {
   validateCurrentStep: () => Promise<void>;
   switchBranch: (branch: string) => Promise<void>;
   createBranch: (branch: string) => Promise<boolean>;
-  runGuiAction: (action: GuiAction, command: string) => Promise<CommandExecutionResult | null>;
   requireGuiBranch: () => boolean;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>((set, get) => {
+  // Git operations (terminal commands, GUI actions and step checks) run one
+  // at a time, in the order they were requested, and print their output when
+  // they run. Otherwise a command typed while another one is still running
+  // prints its result first, and two operations change the repository at
+  // the same time. Queued operations must not queue another one: that would
+  // wait for itself.
+  let operationQueue: Promise<unknown> = Promise.resolve();
+  const runInOrder = <T>(operation: () => Promise<T>): Promise<T> => {
+    const result = operationQueue.then(operation);
+    operationQueue = result.catch(() => undefined);
+    return result;
+  };
+
+  // Runs a GUI operation as its git command and prints the result once.
+  // The step is checked inside performGuiAction, so no second validation here.
+  // Callers run it inside runInOrder.
+  const runGuiCommand = async (
+    action: GuiAction,
+    command: string
+  ): Promise<CommandExecutionResult | null> => {
+    const { tutorialService } = get();
+
+    if (!tutorialService) {
+      return null;
+    }
+
+    const stepBeforeCommand = tutorialService.getCurrentStep();
+
+    try {
+      const result = await tutorialService.performGuiAction(action, command);
+
+      set({
+        terminalOutput: [
+          ...get().terminalOutput,
+          `[GUI] ${command}`,
+          ...formatCommandResult(result, stepBeforeCommand),
+        ],
+      });
+
+      await get().refreshGitState();
+
+      set({
+        currentStep: tutorialService.getCurrentStep(),
+        tutorialState: tutorialService.getState(),
+      });
+      return result;
+    } catch (error) {
+      console.error(`Error running GUI action ${action}:`, error);
+      return null;
+    }
+  };
+
+  return {
   // Initial state
   tutorialService: null,
   gitState: {
@@ -150,46 +202,47 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  // Execute command
-  executeCommand: async (command: string) => {
-    const { tutorialService, terminalOutput } = get();
+  // Execute command. The command line is printed when the command starts,
+  // so it always sits right above its own output.
+  executeCommand: (command: string) =>
+    runInOrder(async () => {
+      const { tutorialService } = get();
 
-    if (!tutorialService) {
-      return;
-    }
+      if (!tutorialService) {
+        return;
+      }
 
-    const previousStep = tutorialService.getCurrentStep();
+      const previousStep = tutorialService.getCurrentStep();
 
-    // Add command to output
-    set({
-      terminalOutput: [...terminalOutput, `$ ${command}`],
-    });
-
-    try {
-      const result: CommandExecutionResult = await tutorialService.executeCommand(command);
-
+      // Add command to output
       set({
-        terminalOutput: [...get().terminalOutput, ...formatCommandResult(result, previousStep)],
+        terminalOutput: [...get().terminalOutput, `$ ${command}`],
       });
 
-      // Refresh state
-      await get().refreshGitState();
+      try {
+        const result: CommandExecutionResult = await tutorialService.executeCommand(command);
 
-      const currentStep = tutorialService.getCurrentStep();
-      const tutorialState = tutorialService.getState();
+        set({
+          terminalOutput: [...get().terminalOutput, ...formatCommandResult(result, previousStep)],
+        });
 
-      set({ currentStep, tutorialState });
+        // Refresh state
+        await get().refreshGitState();
 
-    } catch (error) {
-      set({
-        terminalOutput: [
-          ...get().terminalOutput,
-          `Error: ${getErrorMessage(error, 'Command execution failed')}`,
-          '',
-        ],
-      });
-    }
-  },
+        const currentStep = tutorialService.getCurrentStep();
+        const tutorialState = tutorialService.getState();
+
+        set({ currentStep, tutorialState });
+      } catch (error) {
+        set({
+          terminalOutput: [
+            ...get().terminalOutput,
+            `Error: ${getErrorMessage(error, 'Command execution failed')}`,
+            '',
+          ],
+        });
+      }
+    }),
 
   // Edit file
   editFile: async (filepath: string, content: string) => {
@@ -291,94 +344,66 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ sidebarView: view });
   },
 
+  // GUI actions below check the branch and run their command when their turn
+  // comes, so they see the state left by the operations queued before them.
+
   // Stage file (GUI action)
-  stageFile: async (filepath: string) => {
-    if (!get().requireGuiBranch()) {
-      return;
-    }
-    await get().runGuiAction('stage-file', `git add ${filepath}`);
-  },
+  stageFile: (filepath: string) =>
+    runInOrder(async () => {
+      if (!get().requireGuiBranch()) {
+        return;
+      }
+      await runGuiCommand('stage-file', `git add ${filepath}`);
+    }),
 
   // Unstage file (GUI action)
-  unstageFile: async (filepath: string) => {
-    const { tutorialService } = get();
+  unstageFile: (filepath: string) =>
+    runInOrder(async () => {
+      const { tutorialService } = get();
 
-    if (!tutorialService || !get().requireGuiBranch()) {
-      return;
-    }
+      if (!tutorialService || !get().requireGuiBranch()) {
+        return;
+      }
 
-    // There is no git command for unstaging in the tutorial, so check the
-    // step here instead of going through runGuiAction.
-    const denied = tutorialService.checkGuiAction('unstage-file');
-    if (denied) {
-      set({
-        terminalOutput: [
-          ...get().terminalOutput,
-          `[GUI] git restore --staged ${filepath}`,
-          ...formatCommandResult(denied, tutorialService.getCurrentStep()),
-        ],
-      });
-      return;
-    }
+      // There is no git command for unstaging in the tutorial, so check the
+      // step here instead of going through runGuiCommand.
+      const denied = tutorialService.checkGuiAction('unstage-file');
+      if (denied) {
+        set({
+          terminalOutput: [
+            ...get().terminalOutput,
+            `[GUI] git restore --staged ${filepath}`,
+            ...formatCommandResult(denied, tutorialService.getCurrentStep()),
+          ],
+        });
+        return;
+      }
 
-    try {
-      await tutorialService.unstageFile(filepath);
-      await get().refreshGitState();
-    } catch (error) {
-      console.error('Error unstaging file:', error);
-    }
-  },
+      try {
+        await tutorialService.unstageFile(filepath);
+        await get().refreshGitState();
+      } catch (error) {
+        console.error('Error unstaging file:', error);
+      }
+    }),
 
   // Commit (GUI action)
-  commit: async (message: string) => {
-    if (!get().requireGuiBranch()) {
-      return;
-    }
-    await get().runGuiAction('commit', `git commit -m "${message}"`);
-  },
+  commit: (message: string) =>
+    runInOrder(async () => {
+      if (!get().requireGuiBranch()) {
+        return;
+      }
+      await runGuiCommand('commit', `git commit -m "${message}"`);
+    }),
 
   // Push (GUI action)
-  push: async () => {
-    if (!get().requireGuiBranch()) {
-      return;
-    }
-    await get().runGuiAction('push', `git push origin ${get().gitState.currentBranch}`);
-  },
-
-  // Runs a GUI operation as its git command and prints the result once.
-  // The step is checked inside performGuiAction, so no second validation here.
-  runGuiAction: async (action: GuiAction, command: string) => {
-    const { tutorialService } = get();
-
-    if (!tutorialService) {
-      return null;
-    }
-
-    const stepBeforeCommand = tutorialService.getCurrentStep();
-
-    try {
-      const result = await tutorialService.performGuiAction(action, command);
-
-      set({
-        terminalOutput: [
-          ...get().terminalOutput,
-          `[GUI] ${command}`,
-          ...formatCommandResult(result, stepBeforeCommand),
-        ],
-      });
-
-      await get().refreshGitState();
-
-      set({
-        currentStep: tutorialService.getCurrentStep(),
-        tutorialState: tutorialService.getState(),
-      });
-      return result;
-    } catch (error) {
-      console.error(`Error running GUI action ${action}:`, error);
-      return null;
-    }
-  },
+  push: () =>
+    runInOrder(async () => {
+      if (!get().requireGuiBranch()) {
+        return;
+      }
+      await runGuiCommand('push', `git push origin ${get().gitState.currentBranch}`);
+    }),
 
   // Staging, committing and pushing in the GUI stage must happen on the GUI
   // branch. Prints a hint and returns false otherwise.
@@ -395,72 +420,83 @@ export const useAppStore = create<AppState>((set, get) => ({
     return true;
   },
 
-  validateCurrentStep: async () => {
-    const { tutorialService } = get();
+  validateCurrentStep: () => {
+    // The check is for the step on screen when it was requested. If an
+    // operation queued before it has already completed that step, checking
+    // the next step instead could skip a confirmation step, so drop it. The
+    // operation that completed the step has already printed its message.
+    const requestedStep = get().tutorialService?.getCurrentStep();
 
-    if (!tutorialService) {
-      return;
-    }
+    return runInOrder(async () => {
+      const { tutorialService } = get();
 
-    const previousStep = tutorialService.getCurrentStep();
+      if (!tutorialService || tutorialService.getCurrentStep() !== requestedStep) {
+        return;
+      }
 
-    const validation = await tutorialService.validateCurrentStep();
+      const previousStep = tutorialService.getCurrentStep();
 
-    // A superseded check was already reported by the check that completed
-    // the step, so print nothing for it.
-    if (!validation.superseded) {
-      const newOutput = [...get().terminalOutput];
-      if (validation.passed) {
-        if (previousStep.successMessage) {
-          newOutput.push(`✓ ${previousStep.successMessage}`);
+      const validation = await tutorialService.validateCurrentStep();
+
+      // A superseded check was already reported by the check that completed
+      // the step, so print nothing for it.
+      if (!validation.superseded) {
+        const newOutput = [...get().terminalOutput];
+        if (validation.passed) {
+          if (previousStep.successMessage) {
+            newOutput.push(`✓ ${previousStep.successMessage}`);
+          }
+        } else {
+          newOutput.push(validation.message);
+          if (validation.hint) {
+            newOutput.push(`Hint: ${validation.hint}`);
+          }
         }
-      } else {
-        newOutput.push(validation.message);
-        if (validation.hint) {
-          newOutput.push(`Hint: ${validation.hint}`);
+        newOutput.push('');
+        set({ terminalOutput: newOutput });
+      }
+
+      await get().refreshGitState();
+
+      const currentStep = tutorialService.getCurrentStep();
+      const tutorialState = tutorialService.getState();
+
+      set({ currentStep, tutorialState });
+    });
+  },
+
+  switchBranch: (branch: string) =>
+    runInOrder(async () => {
+      const { tutorialService } = get();
+
+      if (!tutorialService) {
+        return;
+      }
+
+      const result = await runGuiCommand('switch-branch', `git checkout ${branch}`);
+      const { currentFile } = get();
+
+      if (result?.success && currentFile) {
+        try {
+          const content = await tutorialService.readFile(currentFile);
+          set({ fileContent: content });
+        } catch (error) {
+          console.error('Error reading file after branch switch:', error);
+          set({ fileContent: '' });
         }
       }
-      newOutput.push('');
-      set({ terminalOutput: newOutput });
-    }
+    }),
 
-    await get().refreshGitState();
+  createBranch: (branch: string) =>
+    runInOrder(async () => {
+      const trimmed = branch.trim();
 
-    const currentStep = tutorialService.getCurrentStep();
-    const tutorialState = tutorialService.getState();
-
-    set({ currentStep, tutorialState });
-  },
-
-  switchBranch: async (branch: string) => {
-    const { tutorialService } = get();
-
-    if (!tutorialService) {
-      return;
-    }
-
-    const result = await get().runGuiAction('switch-branch', `git checkout ${branch}`);
-    const { currentFile } = get();
-
-    if (result?.success && currentFile) {
-      try {
-        const content = await tutorialService.readFile(currentFile);
-        set({ fileContent: content });
-      } catch (error) {
-        console.error('Error reading file after branch switch:', error);
-        set({ fileContent: '' });
+      if (!get().tutorialService || trimmed !== GUI_BRANCH) {
+        return false;
       }
-    }
-  },
 
-  createBranch: async (branch: string) => {
-    const trimmed = branch.trim();
-
-    if (!get().tutorialService || trimmed !== GUI_BRANCH) {
-      return false;
-    }
-
-    const result = await get().runGuiAction('create-branch', `git checkout -b ${trimmed}`);
-    return result?.success ?? false;
-  },
-}));
+      const result = await runGuiCommand('create-branch', `git checkout -b ${trimmed}`);
+      return result?.success ?? false;
+    }),
+  };
+});
