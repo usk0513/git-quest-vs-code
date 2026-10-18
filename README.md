@@ -68,7 +68,7 @@ npm run test
 # カバレッジ付きでテスト
 npm run test:coverage
 
-# リント（コード品質チェック）
+# リント（Biome。エラーと警告が0件であることを確認）
 npm run lint
 ```
 
@@ -114,7 +114,7 @@ Takumi Guard が、そのパッケージを悪意あるものとしてブロッ�
 Pull Request と `main` へのデプロイでは、`.github/workflows/ci.yml` が次を確認します。
 
 - `.npmrc` の設定が反映されていること
-- `npm ci`、ビルド、カバレッジ付きテストが成功すること
+- `npm ci`、リント（Biome）、ビルド、カバレッジ付きテストが成功すること
 - 本番依存に既知の脆弱性がないこと（`npm audit --omit=dev`）
 - レジストリ署名を検証できること（`npm audit signatures`）
 

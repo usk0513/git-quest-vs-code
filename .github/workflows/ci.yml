@@ -41,6 +41,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Biome; fails on any error or warning. The GitHub reporter adds
+      # annotations to the pull request.
+      - name: Lint
+        run: npm run lint -- --reporter=github
+
       - name: Build
         run: npm run build
 
