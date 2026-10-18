@@ -548,7 +548,7 @@ jobs:
 npm run test
 
 # 1回だけ実行
-npm run test:unit
+npm run test -- --run
 
 # カバレッジ付き実行
 npm run test:coverage
