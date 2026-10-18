@@ -80,6 +80,9 @@ npm run test:coverage
 
 # リント（Biome。エラーと警告が0件であることを確認）
 npm run lint
+
+# 型チェック（アプリ・設定ファイル・テスト。npm run build でも実行される）
+npm run typecheck
 ```
 
 ### 依存パッケージの取得とセキュリティ設定

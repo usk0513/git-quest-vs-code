@@ -43,6 +43,7 @@ npm install -D --save-exact @biomejs/biome   # リント（設定は biome.json�
 ### 2.2 設定ファイル作成
 
 #### tsconfig.json
+現在の構成では、`tsconfig.json` は `tsconfig.app.json`（src）・`tsconfig.node.json`（Vite / Vitest の設定ファイル）・`tsconfig.test.json`（テスト）を参照するだけで、`tsc -b` で3つをまとめて型チェックします。下はアプリ用（`tsconfig.app.json`）の主な設定です。
 ```json
 {
   "compilerOptions": {
