@@ -34,17 +34,18 @@
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
     "@vitejs/plugin-react": "^4.3.1",
-    "@vitest/ui": "^4.0.14",
+    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/ui": "^4.1.12",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
-    "fake-indexeddb": "^6.2.4",
+    "fake-indexeddb": "^6.2.6",
     "jsdom": "^24.1.0",
-    "postcss": "^8.4.38",
+    "postcss": "^8.5.30",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.2.2",
-    "vite": "^7.2.4",
-    "vitest": "^4.0.14"
+    "vite": "^7.3.7",
+    "vitest": "^4.1.12"
   }
 }

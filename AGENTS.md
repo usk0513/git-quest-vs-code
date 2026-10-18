@@ -16,4 +16,4 @@ Vitest with React Testing Library drives unit and integration coverage. Mirror p
 Keep commits short, imperative, and single-purpose, matching the existing history (e.g., `Add tutorial service and step validation`). Reference related issues in the body when necessary. Before opening a pull request, run `npm run lint` and `npm run test`, document the change in a brief summary, note manual checks, and attach screenshots or recordings for UI or tutorial updates. Call out new environment variables or migrations for reviewer visibility.
 
 ## Environment & Configuration Tips
-Use Node.js 18.x and npm 9.x. Tailwind, PostCSS, and Vite read from the root `tailwind.config.js`, `postcss.config.js`, and `vite.config.ts`; restart `npm run dev` after editing them. Keep tutorial updates and mock repositories in temporary branches to avoid polluting the main assets.
+Use Node.js 24.x (LTS) and the bundled npm 11.x. Tailwind, PostCSS, and Vite read from the root `tailwind.config.js`, `postcss.config.js`, and `vite.config.ts`; restart `npm run dev` after editing them. Keep tutorial updates and mock repositories in temporary branches to avoid polluting the main assets.
