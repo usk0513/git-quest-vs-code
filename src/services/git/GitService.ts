@@ -313,7 +313,7 @@ export class GitService {
     }
   }
 
-  // Lines of `git diff` output for one file, or none if the contents match.
+  // Lines of `git diff` output for one file, or none if nothing changed.
   private createUnifiedDiff(filepath: string, oldSide: DiffSide, newSide: DiffSide): string[] {
     const diffLines = this.computeDiffLines(
       splitLines(oldSide?.content ?? ''),
@@ -321,34 +321,35 @@ export class GitService {
     );
     const hunks = this.groupIntoHunks(diffLines);
 
-    if (hunks.length === 0) {
+    // Without hunks, only an added or deleted file is a change (an empty
+    // one). A file on both sides with equal content, or on neither side
+    // (only in the index), prints nothing.
+    if (hunks.length === 0 && Boolean(oldSide) === Boolean(newSide)) {
       return [];
     }
 
     const header = [`diff --git a/${filepath} b/${filepath}`];
+    let fileNames: string[];
     if (!oldSide && newSide) {
-      header.push(
-        `new file mode ${FILE_MODE}`,
-        `index ${NULL_OID}..${shortOid(newSide.oid)}`,
-        '--- /dev/null',
-        `+++ b/${filepath}`
-      );
+      header.push(`new file mode ${FILE_MODE}`, `index ${NULL_OID}..${shortOid(newSide.oid)}`);
+      fileNames = ['--- /dev/null', `+++ b/${filepath}`];
     } else if (oldSide && !newSide) {
-      header.push(
-        `deleted file mode ${FILE_MODE}`,
-        `index ${shortOid(oldSide.oid)}..${NULL_OID}`,
-        `--- a/${filepath}`,
-        '+++ /dev/null'
-      );
+      header.push(`deleted file mode ${FILE_MODE}`, `index ${shortOid(oldSide.oid)}..${NULL_OID}`);
+      fileNames = [`--- a/${filepath}`, '+++ /dev/null'];
     } else {
       header.push(
-        `index ${shortOid(oldSide?.oid ?? NULL_OID)}..${shortOid(newSide?.oid ?? NULL_OID)} ${FILE_MODE}`,
-        `--- a/${filepath}`,
-        `+++ b/${filepath}`
+        `index ${shortOid(oldSide?.oid ?? NULL_OID)}..${shortOid(newSide?.oid ?? NULL_OID)} ${FILE_MODE}`
       );
+      fileNames = [`--- a/${filepath}`, `+++ b/${filepath}`];
     }
 
-    return [...header, ...hunks.flatMap((hunk) => this.formatHunk(hunk))];
+    // Git prints the ---/+++ lines only when there is a hunk, so an added or
+    // deleted empty file shows the header alone.
+    if (hunks.length === 0) {
+      return header;
+    }
+
+    return [...header, ...fileNames, ...hunks.flatMap((hunk) => this.formatHunk(hunk))];
   }
 
   private formatHunk(hunk: DiffLine[]): string[] {

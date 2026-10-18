@@ -276,6 +276,33 @@ describe('GitService.diff', () => {
     );
   });
 
+  it('shows an added empty file with its header only', async () => {
+    const { fs, git } = await setUpRepo({ 'a.txt': 'keep\n' });
+    await fs.writeFile(`${DIR}/empty.txt`, '');
+    await git.add(DIR, 'empty.txt');
+
+    expect(await git.diff(DIR)).toBe(
+      lines(
+        'diff --git a/empty.txt b/empty.txt',
+        'new file mode 100644',
+        'index 0000000..e69de29'
+      )
+    );
+  });
+
+  it('shows a deleted empty file with its header only', async () => {
+    const { fs, git } = await setUpRepo({ 'a.txt': 'keep\n', 'gone.txt': '' });
+    await fs.rm(`${DIR}/gone.txt`);
+
+    expect(await git.diff(DIR)).toBe(
+      lines(
+        'diff --git a/gone.txt b/gone.txt',
+        'deleted file mode 100644',
+        'index e69de29..0000000'
+      )
+    );
+  });
+
   // More lines than a function call accepts as arguments (V8 fails at
   // roughly 10^5), so the diff must not spread the lines into a call.
   const MANY_LINES = 150000;
