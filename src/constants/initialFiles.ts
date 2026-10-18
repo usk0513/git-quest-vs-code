@@ -15,3 +15,7 @@ Edit the files and commit your changes!
 export const REMOTE_REPO_NAME = 'sample-repo';
 export const WORKSPACE_DIR = '/workspace';
 export const REMOTE_DIR = '/remote-repo';
+
+// The GUI stage creates its branch from this one: the branch menu offers
+// "+ 新しいブランチの作成..." only while it is checked out.
+export const GUI_BRANCH_BASE = 'main';

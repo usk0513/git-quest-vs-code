@@ -141,6 +141,126 @@ describe('TutorialService GUI actions and push validation', () => {
     expect(results.filter((r) => r.superseded)).toHaveLength(1);
   });
 
+  // The GUI stage blocks the git commands that change the repository, so a
+  // failed check there must point to the on-screen control instead.
+  it.each([
+    {
+      id: 20,
+      setUp: () => prepareGuiBranchWithEdit('Hello, Git Quest!'),
+      message: 'まだ main ブランチに切り替わっていません',
+      hint: '画面左下のブランチ名をクリックし、画面上部に表示されるメニューから main をクリックしてください',
+    },
+    {
+      id: 22,
+      setUp: async () => {
+        goToStep(1);
+        await service.executeCommand('git clone /remote-repo', { skipValidation: true });
+      },
+      message: 'feature/gui-test ブランチはまだ作成されていません',
+      hint: '画面左下のブランチ名をクリックし、画面上部に表示されるメニューの「+ 新しいブランチの作成...」で feature/gui-test を作成してください',
+    },
+    {
+      id: 31,
+      setUp: () => prepareGuiBranchWithEdit('Hello'),
+      message: 'greeting.txt に「Hello, Git Quest!」がまだ入力されていません',
+      hint: 'エクスプローラーで greeting.txt をクリックして開き、中央のエディタに「Hello, Git Quest!」と入力してください',
+    },
+    {
+      id: 41,
+      setUp: () => prepareGuiBranchWithEdit('Hello, Git Quest!'),
+      message: 'greeting.txt はまだステージされていません',
+      hint: 'ソース管理ビューの「変更」で greeting.txt の行にマウスを乗せ、右端に表示される「+」ボタンをクリックしてください',
+    },
+    {
+      id: 51,
+      setUp: () => prepareGuiBranchWithEdit('Hello, Git Quest!'),
+      message: 'まだ新しいコミットがありません',
+      hint: 'ソース管理ビューでコミットメッセージを入力し、「✓ コミット」ボタンをクリックしてください',
+    },
+    {
+      id: 61,
+      setUp: () => prepareGuiBranchWithEdit('Hello, Git Quest!'),
+      message: 'まだプッシュしていません',
+      hint: 'ソース管理ビューの「✓ コミット」ボタンの右にある「↑ プッシュ」ボタンをクリックしてください',
+    },
+  ])('names the on-screen control when the check of GUI step $id fails', async ({
+    id,
+    setUp,
+    message,
+    hint,
+  }) => {
+    await setUp();
+    goToStep(id);
+
+    const result = await service.validateCurrentStep();
+
+    expect(result).toEqual({ passed: false, message, hint });
+    expect(result.hint).not.toMatch(/\bgit\b/);
+    expect(service.getState().currentStep).toBe(id);
+  });
+
+  it('reports the same GUI wording after a command on a GUI step', async () => {
+    await prepareGuiBranchWithEdit('Hello, Git Quest!');
+    goToStep(41);
+
+    const result = await service.executeCommand('git status');
+
+    expect(result.success).toBe(true);
+    expect(result.validationResult?.message).toBe('greeting.txt はまだステージされていません');
+    expect(result.validationResult?.hint).toContain('「+」ボタン');
+  });
+
+  // The branch menu creates the GUI branch only from main (App.tsx), so on
+  // another branch the hint asks for the switch first.
+  it('asks to switch to main before creating the GUI branch from another branch', async () => {
+    goToStep(1);
+    await service.executeCommand('git clone /remote-repo', { skipValidation: true });
+    goToStep(2);
+    await service.executeCommand('git checkout -b feature/add-greeting', { skipValidation: true });
+    goToStep(22);
+
+    const onOtherBranch = await service.validateCurrentStep();
+    expect(onOtherBranch.hint).toBe(
+      '「+ 新しいブランチの作成...」は main ブランチにいるときだけ使えます。先に、画面左下のブランチ名をクリックし、画面上部に表示されるメニューから main をクリックして切り替えてください'
+    );
+
+    const switched = await service.performGuiAction('switch-branch', 'git checkout main');
+    expect(switched.validationResult?.hint).toBe(
+      '画面左下のブランチ名をクリックし、画面上部に表示されるメニューの「+ 新しいブランチの作成...」で feature/gui-test を作成してください'
+    );
+
+    const created = await service.performGuiAction(
+      'create-branch',
+      'git checkout -b feature/gui-test'
+    );
+    expect(created.stepCompleted).toBe(true);
+  });
+
+  it('keeps the git command hints in the terminal stage', async () => {
+    goToStep(1);
+    await service.executeCommand('git clone /remote-repo', { skipValidation: true });
+    await service.editFile('greeting.txt', 'Hello, Git!');
+    goToStep(7);
+
+    const result = await service.validateCurrentStep();
+
+    expect(result).toEqual({
+      passed: false,
+      message: 'File greeting.txt is not staged',
+      hint: 'Use git add to stage the file',
+    });
+  });
+
+  it('lists the branches with git branch on a GUI step', async () => {
+    await prepareGuiBranchWithEdit('Hello, Git Quest!');
+    goToStep(23);
+
+    const result = await service.executeCommand('git branch');
+
+    expect(result.success).toBe(true);
+    expect(result.output).toBe('* feature/gui-test\n  main');
+  });
+
   it('rejects changing actions on confirmation steps without running them', async () => {
     await prepareGuiBranchWithEdit('Hello, Git Quest!');
     goToStep(62);

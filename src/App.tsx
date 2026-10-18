@@ -6,6 +6,7 @@ import { EditorPane } from './components/Layout/EditorPane';
 import { Terminal } from './components/Layout/Terminal';
 import { StatusBar } from './components/Layout/StatusBar';
 import { InstructionPane } from './components/Layout/InstructionPane';
+import { GUI_BRANCH_BASE } from './constants/initialFiles';
 
 function App() {
   const {
@@ -136,7 +137,7 @@ function App() {
         canCreateBranch={
           currentStep.stage === 'gui' &&
           (currentStep.allowedGuiActions?.includes('create-branch') ?? false) &&
-          gitState.currentBranch === 'main'
+          gitState.currentBranch === GUI_BRANCH_BASE
         }
         menuEnabled={currentStep.stage === 'gui'}
       />

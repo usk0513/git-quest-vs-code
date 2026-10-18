@@ -107,4 +107,37 @@ describe('GitValidator', () => {
       expect(result.passed).toBe(true);
     });
   });
+
+  // The GUI steps allow git status, git log and git branch
+  // (allowedCommands), with the commands that change the repository blocked.
+  describe('validateCommand in the GUI stage', () => {
+    const guiCommands = ['status', 'log', 'branch'] as const;
+    const validateInGui = (command: string) =>
+      validator.validateCommand(command, [...guiCommands], {
+        allowBranchCreation: false,
+        allowMutatingCommands: false,
+      });
+
+    it('allows every command that the hint for a disallowed command lists', () => {
+      const disallowed = validateInGui('git diff');
+      expect(disallowed.passed).toBe(false);
+      expect(disallowed.hint).toBe('Allowed commands: git status, git log, git branch');
+
+      for (const command of guiCommands) {
+        expect(validateInGui(`git ${command}`).passed).toBe(true);
+      }
+    });
+
+    it('still blocks creating a branch with git branch', () => {
+      const result = validateInGui('git branch feature/gui-test');
+      expect(result.passed).toBe(false);
+      expect(result.message).toBe('The command "git branch" is disabled in GUI stage');
+    });
+
+    it('still blocks git branch with a flag', () => {
+      const result = validateInGui('git branch -d feature/add-greeting');
+      expect(result.passed).toBe(false);
+      expect(result.message).toBe('The command "git branch" is disabled in GUI stage');
+    });
+  });
 });
