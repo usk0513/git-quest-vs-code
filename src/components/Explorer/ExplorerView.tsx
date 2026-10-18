@@ -25,17 +25,18 @@ export const ExplorerView: React.FC<ExplorerViewProps> = ({
             {files
               .filter((file) => !file.startsWith('.git'))
               .map((file) => (
-                <div
+                <button
                   key={file}
+                  type="button"
                   onClick={() => onSelectFile(file)}
-                  className={`px-3 py-1 text-sm cursor-pointer hover:bg-vscode-hover ${
+                  className={`block w-full text-left px-3 py-1 text-sm cursor-pointer hover:bg-vscode-hover ${
                     currentFile === file
                       ? 'bg-vscode-active text-vscode-text'
                       : 'text-vscode-text'
                   }`}
                 >
                   📄 {file}
-                </div>
+                </button>
               ))}
           </div>
         ) : (

@@ -41,6 +41,8 @@ export const InstructionPane: React.FC<InstructionPaneProps> = ({ step, onNext, 
             <h3 className="text-sm font-medium text-vscode-text mb-2">💡 ヒント</h3>
             <ul className="text-sm text-vscode-text space-y-1">
               {step.hints.map((hint, index) => (
+                // Hints are static display text for the current step.
+                // biome-ignore lint/suspicious/noArrayIndexKey: static display-only list, see above
                 <li key={index}>• {hint}</li>
               ))}
             </ul>

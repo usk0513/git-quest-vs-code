@@ -10,7 +10,10 @@ export const Terminal: React.FC<TerminalProps> = ({ output, onCommand }) => {
   const [input, setInput] = useState('');
   const outputRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom whenever the output changes. The body does not read
+  // `output`, but the dependency is what triggers the scroll: appended lines,
+  // a reset that replaces the array, or new content of the same length.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: output is the scroll trigger, see above
   useEffect(() => {
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
@@ -35,6 +38,9 @@ export const Terminal: React.FC<TerminalProps> = ({ output, onCommand }) => {
         className="flex-1 overflow-y-auto p-2 font-mono text-sm text-vscode-text"
       >
         {output.map((line, index) => (
+          // Each line is stateless display text. Lines repeat (blank lines,
+          // the same message twice), so the text itself cannot be the key.
+          // biome-ignore lint/suspicious/noArrayIndexKey: stateless display lines, see above
           <div key={index} className="whitespace-pre-wrap">
             {line}
           </div>
@@ -50,6 +56,7 @@ export const Terminal: React.FC<TerminalProps> = ({ output, onCommand }) => {
           onKeyDown={handleKeyDown}
           className="flex-1 bg-transparent border-none outline-none font-mono text-sm text-vscode-text"
           placeholder="Type a git command..."
+          // biome-ignore lint/a11y/noAutofocus: the terminal prompt is the main input of the tutorial; focusing it on load lets learners type commands right away
           autoFocus
         />
       </div>
