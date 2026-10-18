@@ -477,7 +477,8 @@ export class TutorialService {
     const validation = await this.stepValidator.validateStep(
       rules,
       gitState,
-      WORKSPACE_DIR
+      WORKSPACE_DIR,
+      checkedStep.stage
     );
 
     // Checks can overlap (e.g. a validate button pressed twice). If another

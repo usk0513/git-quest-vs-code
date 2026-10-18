@@ -1,4 +1,4 @@
-import type { ValidationResult, ValidationRule, GitState } from '@/types';
+import type { ValidationResult, ValidationRule, GitState, TutorialStage } from '@/types';
 import type { FileSystemService } from '../filesystem/FileSystemService';
 
 export class StepValidator {
@@ -11,12 +11,13 @@ export class StepValidator {
   async validateStep(
     rules: ValidationRule[],
     gitState: GitState,
-    workspaceDir: string
+    workspaceDir: string,
+    stage: TutorialStage = 'terminal'
   ): Promise<ValidationResult> {
     for (const rule of rules) {
       const result = await this.validateRule(rule, gitState, workspaceDir);
       if (!result.passed) {
-        return result;
+        return stage === 'gui' ? this.guiFailure(rule, result) : result;
       }
     }
 
@@ -197,6 +198,65 @@ export class StepValidator {
         message: `Cannot read file ${filepath}`,
         hint: 'Make sure the file exists and is readable',
       };
+    }
+  }
+
+  // In the GUI stage the terminal rejects the commands that change the
+  // repository, so a failed rule must not suggest one. Say what is still
+  // missing and which on-screen control does it, in the same words as the
+  // step instructions. Rules defined without a target keep their message.
+  private guiFailure(rule: ValidationRule, failed: ValidationResult): ValidationResult {
+    const { target } = rule;
+
+    switch (rule.type) {
+      case 'branch-created':
+        if (!target) return failed;
+        return {
+          passed: false,
+          message: `${target} ブランチはまだ作成されていません`,
+          hint: `画面左下のブランチ名をクリックし、画面上部に表示されるメニューの「+ 新しいブランチの作成...」で ${target} を作成してください`,
+        };
+
+      case 'branch-switched':
+        if (!target) return failed;
+        return {
+          passed: false,
+          message: `まだ ${target} ブランチに切り替わっていません`,
+          hint: `画面左下のブランチ名をクリックし、画面上部に表示されるメニューから ${target} をクリックしてください`,
+        };
+
+      case 'file-content':
+        if (!target) return failed;
+        return {
+          passed: false,
+          message: `${target} に「${rule.expectedValue}」がまだ入力されていません`,
+          hint: `エクスプローラーで ${target} をクリックして開き、中央のエディタに「${rule.expectedValue}」と入力してください`,
+        };
+
+      case 'file-staged':
+        if (!target) return failed;
+        return {
+          passed: false,
+          message: `${target} はまだステージされていません`,
+          hint: `ソース管理ビューの「変更」で ${target} の行にマウスを乗せ、右端に表示される「+」ボタンをクリックしてください`,
+        };
+
+      case 'commit-made':
+        return {
+          passed: false,
+          message: 'まだ新しいコミットがありません',
+          hint: 'ソース管理ビューでコミットメッセージを入力し、「✓ コミット」ボタンをクリックしてください',
+        };
+
+      case 'pushed':
+        return {
+          passed: false,
+          message: 'まだプッシュしていません',
+          hint: 'ソース管理ビューの「✓ コミット」ボタンの右にある「↑ プッシュ」ボタンをクリックしてください',
+        };
+
+      default:
+        return failed;
     }
   }
 
